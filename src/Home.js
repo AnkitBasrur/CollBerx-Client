@@ -1,17 +1,38 @@
 import { io } from "socket.io-client";
 import {useEffect, useState} from 'react';
 import './App.css';
+import { useHistory } from 'react-router-dom';
 
 const socket = io("http://localhost:5000/");
 
 function Home() {
+  const history = useHistory()
+
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [newRoomPassword, setNewRoomPassword] = useState('');
+  const [activeUsers, setActiveUsers] = useState('');
 
   useEffect(() => {
     socket.on("Hey", (arg1) => {
-      console.log(arg1); 
+      console.log(arg1);
+      if(arg1.msg === "Success"){
+          if(arg1.roomID){
+            setCode(arg1.roomID)
+            setActiveUsers(arg1.activeUsers)
+            history.push({
+              pathname: '/main',
+              state: { roomID: arg1.roomID }
+            }); 
+        }
+        else{
+          setActiveUsers(arg1.activeUsers)
+          history.push({
+            pathname: '/main',
+            state: { roomID: code, activeUsers }
+          }); 
+        }
+      }
     });
   })
 
@@ -26,7 +47,7 @@ function Home() {
   }
   function leaveRoom(e){
     e.preventDefault();
-    socket.emit("leave", "123");
+    socket.emit("leave", "10qRc0Qyd");
   }
 
   

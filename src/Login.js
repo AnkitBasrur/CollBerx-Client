@@ -21,7 +21,6 @@ function Login(){
             history.push('/home')
         else
             setErrorMessage(res.data.message);
-        console.log("kfd")
 
     }
 
@@ -32,7 +31,6 @@ function Login(){
             history.push('/home')
         else
             setErrorMessage(res.data.message);
-        console.log(signupEmail, signupPassword, signupName)
     }
     return (
         <div>

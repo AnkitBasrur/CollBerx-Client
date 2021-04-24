@@ -15,20 +15,19 @@ function Home() {
 
   useEffect(() => {
     socket.on("Hey", (arg1) => {
-      console.log(arg1);
       if(arg1.msg === "Success"){
           if(arg1.roomID){
             setCode(arg1.roomID)
             setActiveUsers(arg1.activeUsers)
             history.push({
-              pathname: '/main',
-              state: { roomID: arg1.roomID }
+              pathname: `/main/${arg1.roomID}`,
+              state: { roomID: arg1.roomID, activeUsers: arg1.activeUsers}
             }); 
         }
         else{
           setActiveUsers(arg1.activeUsers)
           history.push({
-            pathname: '/main',
+            pathname: `/main/${arg1.roomID}`,
             state: { roomID: code, activeUsers }
           }); 
         }

@@ -1,9 +1,12 @@
 import { useState } from "react";
 import axios from 'axios';
 import { useHistory } from "react-router-dom";
-
+import { useContext } from "react"
+import {ThemeContext} from './contexts/ThemeContext'
 
 function Login(){
+    const { isLightTheme, light, dark } = useContext(ThemeContext);
+    const theme = isLightTheme ? light : dark;
     const history = useHistory();
 
     const [loginEmail, setLoginEmail] = useState('');
@@ -33,7 +36,7 @@ function Login(){
             setErrorMessage(res.data.message);
     }
     return (
-        <div>
+        <div style={{ marginTop:"-1%", minHeight: "100vh", backgroundColor: theme.ui}}>
             <form>
                 <h1>Login</h1>
                 <input type="text" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} /><br />

@@ -12,26 +12,28 @@ const { uuid } = require('uuidv4');
 const socket = io("http://localhost:5000/");
 function Main(){
     let { id } = useParams();
-    const location = useLocation();
-    const [active, setActive] = useState('');
     const [completedValue, setCompletedValue] = useState('');
     const [pendingValue, setPendingValue] = useState('');
     const [activeValue, setActiveValue] = useState('');
     const [pendingData, setPendingData] = useState([]);
     const [activeData, setActiveData] = useState([]);
     const [completedData, setCompletedData] = useState([]);
+    const [chatData, setChatData] = useState([]);
     const [refresh, setRefresh] = useState(true);
+    const [chatValue, setChatValue] = useState('')
 
     useEffect(async() => {
         const res = await axios.get(`http://localhost:4000/getPendingData/${id}`)
-        setPendingData(res.data.data.pending)
-        setActiveData(res.data.data.ongoing)
-        setCompletedData(res.data.data.finsished)
-        console.log(res.data.data.pending)
-        socket.on("Hey", (arg1) => {
-            setActive(arg1.activeUsers);
+        socket.emit("new data", { data: res.data.data })
+
+        socket.on("new data from server", (arg1) => {
+            setPendingData(arg1.data.data.pending)
+            setActiveData(arg1.data.data.ongoing)
+            setCompletedData(arg1.data.data.finsished)
+            setChatData(arg1.data.data.chat);
         });
     }, [refresh])
+
     const addPending = async () => {
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
@@ -64,10 +66,13 @@ function Main(){
         await axios.post('http://localhost:4000/nextLevel', { id, taskID, createdBy, name, createdAt,type, completedAt })
         setRefresh((curr) => !curr)
     }
+    const addChat = async() => {
+        await axios.post('http://localhost:4000/addChat', { id, text: chatValue, from: "Ankit", chatID: uuid() })
+        setRefresh((curr) => !curr)
+    }
     return (
         <div>
-            <h1>{active}</h1>
-            <h1>{location.state.roomID}</h1>
+            <h1>{id}</h1>
             <div class="search-container">
                 <div class="search-item">
                     <Typography variant="h4">Pending</Typography>
@@ -103,6 +108,18 @@ function Main(){
                             <CancelIcon onClick={() => removeData(row.taskID, "Completed")} />
                         </div>
                     ))}
+                </div>
+                <div style={{marginLeft: "7%", marginRight: "5%"}} class="search-item">
+                    <Typography variant="h4">Chat</Typography>
+                    {chatData.length > 0 && chatData.map((row) => (
+                        <div style={{ textAlign: "left"}}>
+                            <Typography variant="h6" display="inline" ><b>{row.from} : </b></Typography>
+                            <Typography variant="h6" display="inline" >{row.text}</Typography>
+                        </div>
+                    ))}
+                    <input type="text" value={chatValue} onChange={(e) => setChatValue(e.target.value)} />
+                    <button onClick={addChat}>Add</button>
+                    
                 </div>
                 
             </div>

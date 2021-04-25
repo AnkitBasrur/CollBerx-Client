@@ -26,10 +26,10 @@ function Home() {
         }
         else{
           setActiveUsers(arg1.activeUsers)
-          history.push({
-            pathname: `/main/${arg1.roomID}`,
-            state: { roomID: code, activeUsers }
-          }); 
+          // history.push({
+          //   pathname: `/main/${arg1.roomID}`,
+          //   state: { roomID: code, activeUsers }
+          // }); 
         }
       }
     });

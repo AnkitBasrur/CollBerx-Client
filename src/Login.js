@@ -5,6 +5,7 @@ import { useContext } from "react"
 import { withStyles } from "@material-ui/core/styles";
 import {ThemeContext} from './contexts/ThemeContext'
 import { Button, TextField, Typography } from "@material-ui/core";
+import NavBar from "./NavBar";
 
 const styles = {
     light: {
@@ -18,7 +19,7 @@ const styles = {
 };
 
 function Login(props){
-    const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
+    const { isLightTheme, light, dark } = useContext(ThemeContext);
     const theme = isLightTheme ? light : dark;
     const history = useHistory();
     const { classes } = props;
@@ -56,8 +57,9 @@ function Login(props){
             setErrorMessage(res.data.message);
     }
     return (
+        <>
+        <NavBar />
         <div style={{  minHeight: "100vh", backgroundColor: theme.ui}}>
-            <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={() => toggleTheme()} >Toggle</Button>
             <form>
                 <ThemeTextTypography variant="h4">Login</ThemeTextTypography>
                 <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" label="Enter Email" style={{backgroundColor: theme.button }} value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}/><br /><br />
@@ -74,6 +76,7 @@ function Login(props){
             </form>
             {errorMessage}
         </div>
+        </>
     )
 }
 

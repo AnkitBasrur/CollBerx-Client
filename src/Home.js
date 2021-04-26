@@ -6,6 +6,7 @@ import { useHistory } from 'react-router-dom';
 import { useContext } from "react";
 import {ThemeContext} from './contexts/ThemeContext'
 import { Button, TextField, Typography } from "@material-ui/core";
+import NavBar from "./NavBar";
 
 const styles = {
   light: {
@@ -83,8 +84,9 @@ function Home(props) {
   }
   
   return (
+    <>
+    <NavBar />
     <div className="App" style={{ height: "100vh", backgroundColor:theme.ui }}>
-    <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={() => toggleTheme()}>Toggle</Button>
     <ThemeTextTypography variant="h4">Join Room</ThemeTextTypography>
       <form>
         <ThemeTextTypography display="inline" style={{ color: theme.text}}>
@@ -107,6 +109,7 @@ function Home(props) {
       </form>
       <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) =>leaveRoom(e)}>Leave Room</Button>
     </div>
+    </>
   );
 }
 

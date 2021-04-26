@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import CancelIcon from '@material-ui/icons/Cancel';
 import DoneIcon from '@material-ui/icons/Done';
+import NavBar from "./NavBar";
 
 const { uuid } = require('uuidv4');
 const styles = {
@@ -93,8 +94,9 @@ function Main(props){
         setRefresh((curr) => !curr)
     }
     return (
+        <>
+        <NavBar />
         <div style={{ minHeight: "100vh", backgroundColor: theme.ui}}>
-            <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={() => toggleTheme()} >Toggle</Button>
             <div class="search-container">
                 <div class="search-item" style={{ backgroundColor: theme.box}}>
                     <ThemeTextTypography variant="h4">Pending</ThemeTextTypography>
@@ -146,6 +148,7 @@ function Main(props){
                 
             </div>
         </div>
+        </>
     )
 }
 

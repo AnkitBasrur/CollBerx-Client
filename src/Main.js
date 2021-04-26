@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { withStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import { Button, TextField, Typography } from "@material-ui/core";
 import { useContext } from "react";
 import {ThemeContext} from './contexts/ThemeContext'
 import { useParams } from "react-router-dom";
@@ -10,12 +10,22 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import DoneIcon from '@material-ui/icons/Done';
 
 const { uuid } = require('uuidv4');
-
+const styles = {
+    light: {
+        color: "black",
+        fontSize: "22px"
+    },
+    dark: {
+        color: "white",
+        fontSize: "22px"
+    }
+};
 const socket = io("http://localhost:5000/");
-function Main(){
+function Main(props){
     let { id } = useParams();
     const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
     const theme = isLightTheme ? light : dark;
+    const { classes } = props;
 
     const [completedValue, setCompletedValue] = useState('');
     const [pendingValue, setPendingValue] = useState('');
@@ -27,7 +37,7 @@ function Main(){
     const [refresh, setRefresh] = useState(true);
     const [chatValue, setChatValue] = useState('')
 
-    const WhiteTextTypography = withStyles({
+    const ThemeTextTypography = withStyles({
         root: {
           color: theme.text
         }
@@ -79,58 +89,58 @@ function Main(){
     }
     const addChat = async() => {
         await axios.post('http://localhost:4000/addChat', { id, text: chatValue, from: "Ankit", chatID: uuid() })
+        setChatValue('')
         setRefresh((curr) => !curr)
     }
     return (
-        <div style={{height: "100vh", backgroundColor: theme.ui}}>
-            <h1>{id}</h1>
-            <button onClick={() => toggleTheme} >Toggle</button>
+        <div style={{ minHeight: "100vh", backgroundColor: theme.ui}}>
+            <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={() => toggleTheme()} >Toggle</Button>
             <div class="search-container">
                 <div class="search-item" style={{ backgroundColor: theme.box}}>
-                    <WhiteTextTypography variant="h4">Pending</WhiteTextTypography>
-                    <input type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
-                    <button onClick={addPending}>Add</button>
+                    <ThemeTextTypography variant="h4">Pending</ThemeTextTypography>
+                    <TextField label="Add To Pending Tasks" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
+                    <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addPending}>Add</Button>
                     {pendingData.map((row) => (
                         <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                            <WhiteTextTypography variant="h6" display="inline" >{row.name}</WhiteTextTypography>
+                            <ThemeTextTypography variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                             <DoneIcon style={{color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
                             <CancelIcon style={{color: theme.text}} onClick={() => removeData(row.taskID, "Pending")} />
                         </div>
                     ))}
                 </div>
                 <div class="search-item" style={{ backgroundColor: theme.box}}>
-                    <WhiteTextTypography variant="h4">Active</WhiteTextTypography>
-                    <input type="text" value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
-                    <button onClick={addActive}>Add</button>
+                    <ThemeTextTypography variant="h4">Active</ThemeTextTypography>
+                    <TextField label="Add To Active Tasks" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
+                    <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button>
                     {activeData.length > 0 && activeData.map((row) => (
                         <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                            <WhiteTextTypography variant="h6" display="inline" >{row.name}</WhiteTextTypography>
+                            <ThemeTextTypography variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                             <DoneIcon style={{color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
                             <CancelIcon style={{color: theme.text}} onClick={() => removeData(row.taskID, "Active")} />
                         </div>
                     ))}
                 </div>
                 <div class="search-item" style={{ backgroundColor: theme.box }}>
-                    <WhiteTextTypography variant="h4">Completed</WhiteTextTypography>
-                    <input type="text" value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
-                    <button onClick={addCompleted}>Add</button>
+                    <ThemeTextTypography variant="h4">Completed</ThemeTextTypography>
+                    <TextField label="Add To Completed Tasks" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
+                    <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button>
                     {completedData.length > 0 && completedData.map((row) => (
                         <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                            <WhiteTextTypography variant="h6" display="inline" >{row.name}</WhiteTextTypography>
+                            <ThemeTextTypography variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                             <CancelIcon style={{color: theme.text, marginLeft: "3%"}} onClick={() => removeData(row.taskID, "Completed")} />
                         </div>
                     ))}
                 </div>
                 <div style={{marginLeft: "7%", marginRight: "5%", backgroundColor: theme.box}} class="search-item">
-                    <WhiteTextTypography variant="h4">Chat</WhiteTextTypography>
+                    <ThemeTextTypography variant="h4">Chat</ThemeTextTypography>
                     {chatData.length > 0 && chatData.map((row) => (
                         <div style={{ textAlign: "left"}}>
-                            <WhiteTextTypography variant="h6" display="inline" ><b>{row.from} : </b></WhiteTextTypography>
-                            <WhiteTextTypography variant="h6" display="inline" >{row.text}</WhiteTextTypography>
+                            <ThemeTextTypography variant="h6" display="inline" ><b>{row.from} : </b></ThemeTextTypography>
+                            <ThemeTextTypography variant="h6" display="inline" >{row.text}</ThemeTextTypography>
                         </div>
                     ))}
-                    <input type="text" value={chatValue} onChange={(e) => setChatValue(e.target.value)} />
-                    <button onClick={addChat}>Add</button>
+                    <TextField label="Type Your Message Here" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={chatValue} onChange={(e) => setChatValue(e.target.value)} />
+                    <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addChat}>Send</Button>
                     
                 </div>
                 
@@ -139,4 +149,4 @@ function Main(){
     )
 }
 
-export default Main;
+export default withStyles(styles)(Main);

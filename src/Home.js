@@ -7,11 +7,23 @@ import { useContext } from "react";
 import {ThemeContext} from './contexts/ThemeContext'
 import { Button, TextField, Typography } from "@material-ui/core";
 
+const styles = {
+  light: {
+      color: "black",
+      fontSize: "22px"
+  },
+  dark: {
+      color: "white",
+      fontSize: "22px"
+  }
+};
+
 const socket = io("http://localhost:5000/");
-function Home() {
+function Home(props) {
   const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;
   const history = useHistory()
+  const { classes } = props;
 
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -33,8 +45,6 @@ function Home() {
     }
   };
 
-  const classes = withStyles(styles)
-  console.log(classes.input)
 
   useEffect(() => {
     socket.on("Hey", (arg1) => {
@@ -77,13 +87,22 @@ function Home() {
     <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={() => toggleTheme()}>Toggle</Button>
     <ThemeTextTypography variant="h4">Join Room</ThemeTextTypography>
       <form>
-        <ThemeTextTypography display="inline" style={{ color: theme.text}}>Enter RoomId:</ThemeTextTypography> <TextField InputProps={{ className: classes.input }}type="text" style={{backgroundColor: theme.button, color: theme.text }} value={code} onChange={(e) => setCode(e.target.value)}/>
-        <ThemeTextTypography display="inline" style={{ color: theme.text}}>Enter Room Password:</ThemeTextTypography> <TextField type="text" style={{backgroundColor: theme.button, textColor: theme.text }} value={password} onChange={(e) => setPassword(e.target.value)}/>
+        <ThemeTextTypography display="inline" style={{ color: theme.text}}>
+          Enter RoomId:
+        </ThemeTextTypography> 
+        <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" style={{backgroundColor: theme.button, color: theme.text }} value={code} onChange={(e) => setCode(e.target.value)}/>
+        <ThemeTextTypography display="inline" style={{ color: theme.text}}>
+          Enter Room Password:
+        </ThemeTextTypography> 
+        <TextField type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, textColor: theme.text }} value={password} onChange={(e) => setPassword(e.target.value)}/>
         <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => joinRoom(e)} value="Submit">Submit</Button>
       </form>
       <ThemeTextTypography variant="h4">Create New Room</ThemeTextTypography>
       <form>
-      <ThemeTextTypography display="inline" style={{ color: theme.text}}>Enter Room Password:</ThemeTextTypography><TextField type="text" color="secondary" style={{backgroundColor: theme.button, color: "white" }} value={newRoomPassword} onChange={(e) => setNewRoomPassword(e.target.value)}/>
+      <ThemeTextTypography display="inline" style={{ color: theme.text}}>
+        Enter Room Password:
+      </ThemeTextTypography>
+      <TextField type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, color: "white" }} value={newRoomPassword} onChange={(e) => setNewRoomPassword(e.target.value)}/>
         <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => createRoom(e)} value="Submit">Submit</Button>
       </form>
       <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) =>leaveRoom(e)}>Leave Room</Button>
@@ -91,4 +110,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default withStyles(styles)(Home);

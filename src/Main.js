@@ -14,7 +14,7 @@ const { uuid } = require('uuidv4');
 const socket = io("http://localhost:5000/");
 function Main(){
     let { id } = useParams();
-    const { isLightTheme, light, dark } = useContext(ThemeContext);
+    const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
     const theme = isLightTheme ? light : dark;
 
     const [completedValue, setCompletedValue] = useState('');
@@ -84,6 +84,7 @@ function Main(){
     return (
         <div style={{height: "100vh", backgroundColor: theme.ui}}>
             <h1>{id}</h1>
+            <button onClick={() => toggleTheme} >Toggle</button>
             <div class="search-container">
                 <div class="search-item" style={{ backgroundColor: theme.box}}>
                     <WhiteTextTypography variant="h4">Pending</WhiteTextTypography>

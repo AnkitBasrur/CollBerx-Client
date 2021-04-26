@@ -9,16 +9,19 @@ class ThemeContextProvider extends Component {
             text: 'black',
             ui: '#ebe8e8',
             box: 'ebe8e8',
-            innerBox: '#cccaca'
+            innerBox: '#cccaca',
+            button: '#d4d5d6'
         },
         dark: {
             text: '#ffffff',
             ui: 'black',
             box: '#4a4848',
-            innerBox: 'black'
+            innerBox: 'black',
+            button: '#343536'
         }
      }
      toggleTheme = () => { 
+         console.log("jj")
          this.setState({ isLightTheme: !this.state.isLightTheme })
      }
     render() { 

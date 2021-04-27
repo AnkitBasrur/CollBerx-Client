@@ -6,6 +6,7 @@ import { withStyles } from "@material-ui/core/styles";
 import {ThemeContext} from './contexts/ThemeContext'
 import { Button, TextField, Typography } from "@material-ui/core";
 import NavBar from "./NavBar";
+import { useCookies } from "react-cookie";
 
 const styles = {
     light: {
@@ -19,6 +20,7 @@ const styles = {
 };
 
 function Login(props){
+    const [cookies, setCookie, removeCookie] = useCookies(["user"]);
     const { isLightTheme, light, dark } = useContext(ThemeContext);
     const theme = isLightTheme ? light : dark;
     const history = useHistory();
@@ -41,8 +43,10 @@ function Login(props){
         e.preventDefault();
         console.log("fjfj")
         const res = await axios.post('http://localhost:4000/login', { email: loginEmail, password: loginPassword} )
-        if(res.data.message === 'Success')
+        if(res.data.message === 'Success'){
+            setCookie("email", loginEmail, { path: '/' });
             history.push('/home')
+        }
         else
             setErrorMessage(res.data.message);
 
@@ -51,8 +55,10 @@ function Login(props){
     const signUpFunction = async(e) => {
         e.preventDefault();
         const res = await axios.post('http://localhost:4000/signup', { name: signupName, email: signupEmail, password: signupPassword} )
-        if(res.data.message === 'Success')
+        if(res.data.message === 'Success'){
+            setCookie("email", signupEmail, { path: '/'});
             history.push('/home')
+        }
         else
             setErrorMessage(res.data.message);
     }
@@ -63,7 +69,7 @@ function Login(props){
             <form>
                 <ThemeTextTypography variant="h4">Login</ThemeTextTypography>
                 <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" label="Enter Email" style={{backgroundColor: theme.button }} value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}/><br /><br />
-                <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" label="Enter Password" style={{backgroundColor: theme.button }} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)}/><br /><br />
+                <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="password" label="Enter Password" style={{backgroundColor: theme.button }} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)}/><br /><br />
                 <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => loginFunction(e)}>Submit</Button>
             </form>
 
@@ -71,10 +77,10 @@ function Login(props){
                 <ThemeTextTypography variant="h4">Signup</ThemeTextTypography>
                 <TextField type="text" label="Enter Your Name" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={signupName} onChange={(e) => setSignupName(e.target.value)}/><br /><br />
                 <TextField type="text" label="Enter Email" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)}/><br /><br />
-                <TextField type="text" label="Enter Password" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)}/><br /><br />
+                <TextField type="password" label="Enter Password" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)}/><br /><br />
                 <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => signUpFunction(e)}>Submit</Button>
             </form>
-            {errorMessage}
+                <ThemeTextTypography variant="h5">{errorMessage}</ThemeTextTypography>
         </div>
         </>
     )

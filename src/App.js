@@ -7,6 +7,7 @@ import Main from "./Main";
 import Login from "./Login";
 import ThemeContextProvider from "./contexts/ThemeContext";
 import NavBar from "./NavBar";
+import AddRoom from "./AddRoom";
 
 function App() {
   return (
@@ -21,6 +22,9 @@ function App() {
               </Route>
               <Route exact path="/main/:id">
                 <Main />
+              </Route>
+              <Route exact path="/addRoom">
+                <AddRoom />
               </Route>
             </Switch>
           </Router>

@@ -1,12 +1,13 @@
-import { io } from "socket.io-client";
 import {useEffect, useState} from 'react';
 import './App.css';
 import { withStyles } from "@material-ui/core/styles";
 import { useHistory } from 'react-router-dom';
 import { useContext } from "react";
 import {ThemeContext} from './contexts/ThemeContext'
-import { Button, TextField, Typography } from "@material-ui/core";
+import { Button, Card, CardActionArea, CardContent, Grid, TextField, Typography } from "@material-ui/core";
 import NavBar from "./NavBar";
+import axios from "axios";
+import { useCookies } from "react-cookie";
 
 const styles = {
   light: {
@@ -19,17 +20,13 @@ const styles = {
   }
 };
 
-const socket = io("http://localhost:5000/");
-function Home(props) {
-  const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
+function Home() {
+  const [cookies] = useCookies(["user"]);
+  const { isLightTheme, light, dark } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;
   const history = useHistory()
-  const { classes } = props;
-
-  const [password, setPassword] = useState('');
-  const [code, setCode] = useState('');
-  const [newRoomPassword, setNewRoomPassword] = useState('');
-  const [activeUsers, setActiveUsers] = useState('');
+  const [projects, setProjects] = useState([]);
+  const [shouldFetch, setShouldFetch] = useState(true)
 
   const ThemeTextTypography = withStyles({
       root: {
@@ -47,67 +44,52 @@ function Home(props) {
   };
 
 
-  useEffect(() => {
-    socket.on("Hey", (arg1) => {
-      if(arg1.msg === "Success"){
-          if(arg1.roomID){
-            setCode(arg1.roomID)
-            setActiveUsers(arg1.activeUsers)
-            history.push({
-              pathname: `/main/${arg1.roomID}`,
-              state: { roomID: arg1.roomID, activeUsers: arg1.activeUsers}
-            }); 
-        }
-        else{
-          setActiveUsers(arg1.activeUsers)
-          // history.push({
-          //   pathname: `/main/${arg1.roomID}`,
-          //   state: { roomID: code, activeUsers }
-          // }); 
-        }
-      }
-    });
+  useEffect(async () => {
+    if(shouldFetch){
+      const projects = await axios.get(`http://localhost:4000/getProjects/${cookies.email}`)
+      setProjects(projects.data)
+      setShouldFetch(false)
+    }
   })
 
-  function joinRoom(e){
-    e.preventDefault();
-    socket.emit('join', code, password);    
-  }
-
-  function createRoom(e){
-    e.preventDefault();
-    socket.emit("create room", newRoomPassword, "Ankit");
-  }
-  function leaveRoom(e){
-    e.preventDefault();
-    socket.emit("leave", "10qRc0Qyd");
+  function handleProject(roomID){
+    // socket.emit("leave", "10qRc0Qyd");
+    console.log("jj")
+    history.push({
+      pathname: `/main/${roomID}`,
+      state: { roomID, activeUsers: 1}
+    }); 
   }
   
   return (
     <>
     <NavBar />
     <div className="App" style={{ height: "100vh", backgroundColor:theme.ui }}>
-    <ThemeTextTypography variant="h4">Join Room</ThemeTextTypography>
-      <form>
-        <ThemeTextTypography display="inline" style={{ color: theme.text}}>
-          Enter RoomId:
-        </ThemeTextTypography> 
-        <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" style={{backgroundColor: theme.button, color: theme.text }} value={code} onChange={(e) => setCode(e.target.value)}/>
-        <ThemeTextTypography display="inline" style={{ color: theme.text}}>
-          Enter Room Password:
-        </ThemeTextTypography> 
-        <TextField type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, textColor: theme.text }} value={password} onChange={(e) => setPassword(e.target.value)}/>
-        <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => joinRoom(e)} value="Submit">Submit</Button>
-      </form>
-      <ThemeTextTypography variant="h4">Create New Room</ThemeTextTypography>
-      <form>
-      <ThemeTextTypography display="inline" style={{ color: theme.text}}>
-        Enter Room Password:
-      </ThemeTextTypography>
-      <TextField type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, color: "white" }} value={newRoomPassword} onChange={(e) => setNewRoomPassword(e.target.value)}/>
-        <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => createRoom(e)} value="Submit">Submit</Button>
-      </form>
-      <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) =>leaveRoom(e)}>Leave Room</Button>
+    
+      <ThemeTextTypography variant="h4">Your Rooms:</ThemeTextTypography>
+        <Grid style={{maxHeight:"1%"}} container spacing={3}>
+                {projects.map((row,i)=>{
+                    return(
+                        <Grid elevation={4} boxShadow={100} key={i} className="grid-style" item xs={2}>
+                            <Card elevation={4} boxShadow={100} style={{boxShadow: "2px 2px 2px #575859", backgroundColor: "#353536"}} onClick={()=> handleProject(row.roomID)}>
+                                <CardActionArea>
+                                    <CardContent>
+                                    <div style={{ textAlign: "center" }}>
+                                        <ThemeTextTypography gutterBottom variant="h5">
+                                            {row.name}
+                                        </ThemeTextTypography>
+                                        <ThemeTextTypography variant="h6" color="textSecondary">
+                                            {row.designation}
+                                        </ThemeTextTypography>
+                                    </div>
+                                    </CardContent>
+                                </CardActionArea>
+                            </Card>
+                        </Grid>
+                    )
+                })}
+          </Grid>
+      {/* <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) =>leaveRoom(e)}>Leave Room</Button> */}
     </div>
     </>
   );

@@ -35,7 +35,7 @@ function NavBar(props){
                   Photos
                 </Typography>
                 <Brightness4Icon style={{marginLeft: "5%"}} onClick={() => toggleTheme() }/>
-                <Typography onClick={() => { removeCookie("email");history.push('/') }} variant="h6" style={{ color: theme.text, marginLeft: "47%"}} color="inherit">
+                <Typography onClick={() => { sessionStorage.removeItem("email");history.push('/') }} variant="h6" style={{ color: theme.text, marginLeft: "47%"}} color="inherit">
                   Logout
                 </Typography>
               </Toolbar>

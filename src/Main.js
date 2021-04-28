@@ -48,7 +48,7 @@ function Main(props){
     useEffect(async() => {
         const res = await axios.get(`http://localhost:4000/getPendingData/${id}`)
         socket.emit("new data", { data: res.data.data })
-
+        console.log(res.data)
         socket.on("new data from server", (arg1) => {
             setPendingData(arg1.data.data.pending)
             setActiveData(arg1.data.data.ongoing)

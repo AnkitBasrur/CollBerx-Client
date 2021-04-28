@@ -55,7 +55,7 @@ function AddRoom(props) {
 
   useEffect(async () => {
     if(shouldFetch){
-      const projects = await axios.get(`http://localhost:4000/getProjects/a`)
+      const projects = await axios.get(`http://localhost:4000/getProjects/${sessionStorage.getItem("email")}`)
       setProjects(projects.data)
       setShouldFetch(false)
     }

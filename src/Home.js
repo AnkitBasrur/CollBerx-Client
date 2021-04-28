@@ -44,7 +44,6 @@ function Home() {
 
   function handleProject(roomID){
     // socket.emit("leave", "10qRc0Qyd");
-    console.log("jj")
     history.push({
       pathname: `/main/${roomID}`,
       state: { roomID, activeUsers: 1}
@@ -69,6 +68,12 @@ function Home() {
                                         </ThemeTextTypography>
                                         <ThemeTextTypography variant="h6" color="textSecondary">
                                             {row.designation}
+                                        </ThemeTextTypography>
+                                        <ThemeTextTypography variant="h6" color="textSecondary">
+                                            {row.data.authLevel} 
+                                        </ThemeTextTypography>
+                                        <ThemeTextTypography variant="h6" color="textSecondary">
+                                            {row.members.length} members 
                                         </ThemeTextTypography>
                                     </div>
                                     </CardContent>

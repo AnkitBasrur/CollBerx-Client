@@ -44,6 +44,7 @@ function Login(props){
         console.log("fjfj")
         const res = await axios.post('http://localhost:4000/login', { email: loginEmail, password: loginPassword} )
         if(res.data.message === 'Success'){
+            sessionStorage.setItem('email', loginEmail)
             setCookie("email", loginEmail, { path: '/' });
             history.push('/home')
         }
@@ -56,6 +57,7 @@ function Login(props){
         e.preventDefault();
         const res = await axios.post('http://localhost:4000/signup', { name: signupName, email: signupEmail, password: signupPassword} )
         if(res.data.message === 'Success'){
+            sessionStorage.setItem('email', signupEmail)
             setCookie("email", signupEmail, { path: '/'});
             history.push('/home')
         }
@@ -64,8 +66,7 @@ function Login(props){
     }
     return (
         <>
-        <NavBar />
-        <div style={{  minHeight: "100vh", backgroundColor: theme.ui}}>
+        <div style={{ minHeight: "100vh", backgroundColor: theme.ui}}>
             <form>
                 <ThemeTextTypography variant="h4">Login</ThemeTextTypography>
                 <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" label="Enter Email" style={{backgroundColor: theme.button }} value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}/><br /><br />

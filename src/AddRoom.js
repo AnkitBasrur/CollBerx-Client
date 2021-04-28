@@ -82,12 +82,12 @@ function AddRoom(props) {
 
   function joinRoom(e){
     e.preventDefault();
-    socket.emit('join', code, password, "ab");    
+    socket.emit('join', code, password, sessionStorage.getItem("email"));    
   }
 
   function createRoom(e){
     e.preventDefault();
-    socket.emit("create room", newRoomPassword, "a", newRoomName);
+    socket.emit("create room", newRoomPassword, sessionStorage.getItem("email"), newRoomName);
   }
   
   return (

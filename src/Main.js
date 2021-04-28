@@ -37,6 +37,7 @@ function Main(props){
     const [chatData, setChatData] = useState([]);
     const [refresh, setRefresh] = useState(true);
     const [chatValue, setChatValue] = useState('')
+    const [onlineUsers, setOnlineUsers] = useState('')
 
     const ThemeTextTypography = withStyles({
         root: {
@@ -54,6 +55,10 @@ function Main(props){
             setCompletedData(arg1.data.data.finsished)
             setChatData(arg1.data.data.chat);
         });
+        socket.on("Hey", (arg1) => {
+            console.log(arg1.activeUsers)
+            setOnlineUsers(arg1.activeUsers)
+        })
     }, [refresh])
 
     const addPending = async () => {
@@ -96,6 +101,7 @@ function Main(props){
     return (
         <>
         <NavBar />
+        <ThemeTextTypography variant="h4">{onlineUsers}</ThemeTextTypography>
         <div style={{ minHeight: "100vh", backgroundColor: theme.ui}}>
             <div class="search-container">
                 <div class="search-item" style={{ backgroundColor: theme.box}}>

@@ -34,19 +34,9 @@ function Home() {
       }
   })(Typography);
 
-  const styles = {
-    root: {
-      background: "black"
-    },
-    input: {
-      color: "white"
-    }
-  };
-
-
   useEffect(async () => {
     if(shouldFetch){
-      const projects = await axios.get(`http://localhost:4000/getProjects/${cookies.email}`)
+      const projects = await axios.get(`http://localhost:4000/getProjects/${sessionStorage.getItem("email")}`)
       setProjects(projects.data)
       setShouldFetch(false)
     }
@@ -63,15 +53,14 @@ function Home() {
   
   return (
     <>
-    <NavBar />
     <div className="App" style={{ height: "100vh", backgroundColor:theme.ui }}>
-    
+    <NavBar />
       <ThemeTextTypography variant="h4">Your Rooms:</ThemeTextTypography>
-        <Grid style={{maxHeight:"1%"}} container spacing={3}>
+        <Grid style={{marginLeft:"2%"}} container spacing={3}>
                 {projects.map((row,i)=>{
                     return(
-                        <Grid elevation={4} boxShadow={100} key={i} className="grid-style" item xs={2}>
-                            <Card elevation={4} boxShadow={100} style={{boxShadow: "2px 2px 2px #575859", backgroundColor: "#353536"}} onClick={()=> handleProject(row.roomID)}>
+                        <Grid key={i} style={{marginRight:"2%"}} item xs={2}>
+                            <Card style={{boxShadow: "2px 2px 2px #575859", backgroundColor: "#353536"}} onClick={()=> handleProject(row.roomID)}>
                                 <CardActionArea>
                                     <CardContent>
                                     <div style={{ textAlign: "center" }}>

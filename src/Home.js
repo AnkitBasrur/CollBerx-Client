@@ -7,7 +7,6 @@ import {ThemeContext} from './contexts/ThemeContext'
 import { Button, Card, CardActionArea, CardContent, Grid, TextField, Typography } from "@material-ui/core";
 import NavBar from "./NavBar";
 import axios from "axios";
-import { useCookies } from "react-cookie";
 
 const styles = {
   light: {
@@ -21,7 +20,6 @@ const styles = {
 };
 
 function Home() {
-  const [cookies] = useCookies(["user"]);
   const { isLightTheme, light, dark } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;
   const history = useHistory()
@@ -42,11 +40,10 @@ function Home() {
     }
   })
 
-  function handleProject(roomID){
-    // socket.emit("leave", "10qRc0Qyd");
+  function handleProject(roomID, authLevel){
     history.push({
       pathname: `/main/${roomID}`,
-      state: { roomID, activeUsers: 1}
+      state: { authLevel }
     }); 
   }
   
@@ -59,7 +56,7 @@ function Home() {
                 {projects.map((row,i)=>{
                     return(
                         <Grid key={i} style={{marginRight:"2%"}} item xs={2}>
-                            <Card style={{boxShadow: "2px 2px 2px #575859", backgroundColor: "#353536"}} onClick={()=> handleProject(row.roomID)}>
+                            <Card style={{boxShadow: "2px 2px 2px #575859", backgroundColor: "#353536"}} onClick={()=> handleProject(row.roomID, row.data.authLevel)}>
                                 <CardActionArea>
                                     <CardContent>
                                     <div style={{ textAlign: "center" }}>

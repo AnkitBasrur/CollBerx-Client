@@ -41,7 +41,6 @@ function Login(props){
 
     const loginFunction = async(e) => {
         e.preventDefault();
-        console.log("fjfj")
         const res = await axios.post('http://localhost:4000/login', { email: loginEmail, password: loginPassword} )
         if(res.data.message === 'Success'){
             sessionStorage.setItem('email', loginEmail)

@@ -10,6 +10,9 @@ import NavBar from "./NavBar";
 import AddRoom from "./AddRoom";
 
 function App() {
+  function getProps(data){
+    console.log(data)
+  }
   return (
     <ThemeContextProvider>
           <Router>
@@ -18,11 +21,9 @@ function App() {
                 <Login />
               </Route>
               <Route exact path="/home">
-                <Home />
+                <Home getProps={getProps} />
               </Route>
-              <Route exact path="/main/:id">
-                <Main />
-              </Route>
+              <Route exact path="/main/:id" component={Main} />
               <Route exact path="/addRoom">
                 <AddRoom />
               </Route>

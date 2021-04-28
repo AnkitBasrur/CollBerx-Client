@@ -12,7 +12,9 @@ class ThemeContextProvider extends Component {
             innerBox: '#cccaca',
             button: '#d4d5d6',
             placeholder: '#949392',
-            navbar: '#c7c6c5'
+            navbar: '#c7c6c5',
+            modalColor: '#fcfcfc',
+            modalBackground: '#bab8b8'
         },
         dark: {
             text: '#ffffff',
@@ -21,7 +23,9 @@ class ThemeContextProvider extends Component {
             innerBox: 'black',
             button: '#343536',
             placeholder: '#949392',
-            navbar: '#242323'
+            navbar: '#242323',
+            modalColor: '#000000',
+            modalBackground: '#454444'
         }
      }
      toggleTheme = () => { 

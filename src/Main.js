@@ -28,8 +28,43 @@ function Main(props){
     const { isLightTheme, light, dark } = useContext(ThemeContext);
     const theme = isLightTheme ? light : dark;
     const { classes } = props;
-    console.log(props.history.location.state.authLevel)
 
+    const outerModal = { 
+        modal: {
+            backgroundColor: "green",
+        },
+        overlay: {
+            backgroundColor: theme.modalBackground
+        }, 
+        content: {
+            width:'40%',
+            height: '70%',
+            alignContent:'center',
+            marginLeft: "28%",
+            marginTop: "3%",
+            overflow: 'auto',
+            backgroundColor: theme.modalColor,
+            border: 'none'
+        }
+    }
+    const innerModal = { 
+        modal: {
+            backgroundColor: "green",
+        },
+        overlay: {
+            backgroundColor: theme.modalBackground
+        }, 
+        content: {
+            width:'10%',
+            height: '10%',
+            alignContent:'center',
+            marginLeft: "28%",
+            marginTop: "3%",
+            overflow: 'auto',
+            backgroundColor: theme.modalColor,
+            border: 'none'
+        }
+    }
     const [completedValue, setCompletedValue] = useState('');
     const [pendingValue, setPendingValue] = useState('');
     const [activeValue, setActiveValue] = useState('');
@@ -39,99 +74,106 @@ function Main(props){
     const [chatData, setChatData] = useState([]);
     const [refresh, setRefresh] = useState(true);
     const [chatValue, setChatValue] = useState('')
-    const [onlineUsers, setOnlineUsers] = useState('')
+    const [authLevel, setAuthLevel] = useState('')
     const [showModal, setShowModal] = useState(false)
-
     const [project, setProject] = useState("");
+
     const ThemeTextTypography = withStyles({
         root: {
           color: theme.text
         }
     })(Typography);
 
-    useEffect(async() => {
-        const res = await axios.get(`http://localhost:4000/getPendingData/${id}`)
-        socket.emit("new data", { data: res.data.data })
-        setProject(res.data.data)
-        console.log(res.data.data.members)
-        socket.on("new data from server", (arg1) => {
-            setPendingData(arg1.data.data.pending)
-            setActiveData(arg1.data.data.ongoing)
-            setCompletedData(arg1.data.data.finsished)
-            setChatData(arg1.data.data.chat);
-        });
-        socket.on("Hey", (arg1) => {
-            setOnlineUsers(arg1.activeUsers)
-        })
+    useEffect(() => {
+        const fetchData = async() => {
+            const res = await axios.get(`http://localhost:4000/getPendingData/${id}/${sessionStorage.getItem("email")}`)
+            setAuthLevel(res.data.authLevel)
+            socket.emit("new data", { data: res.data.data })
+            setRefresh(false)
+            socket.on("new data from server", (arg1) => {
+                console.log("fetchh")
+                setProject(arg1.data.data)
+                setPendingData(arg1.data.data.pending)
+                setActiveData(arg1.data.data.ongoing)
+                setCompletedData(arg1.data.data.finsished)
+                setChatData(arg1.data.data.chat);
+            });
+            socket.on("Hey", (arg1) => {
+
+            })
+        }
+        if(refresh)
+            fetchData()
     }, [refresh])
 
+    const changeAuthLevel = async(user, level) => {
+        if(authLevel !== "Level X" || user === sessionStorage.getItem("email")) 
+            return
+        await axios.post('http://localhost:4000/changeAuth', {id, user, level});
+        setRefresh(true)
+    }
     const addPending = async () => {
+        if(authLevel === "Level Z")
+            return;
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
         await axios.post('http://localhost:4000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: "AB" })
-        setRefresh((curr) => !curr)
+        setRefresh(true)
         setPendingValue('')
     }
     const addCompleted = async() => {
+        if(authLevel === "Level Z")
+            return;
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
         await axios.post('http://localhost:4000/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: "AB", completedAt: date })
-        setRefresh((curr) => !curr)
+        setRefresh(true)
         setCompletedValue('')
     }
     const addActive = async() => {
+        if(authLevel === "Level Z")
+            return;
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
         await axios.post('http://localhost:4000/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: "AB" })
-        setRefresh((curr) => !curr)
+        setRefresh(true)
         setActiveValue('')
     }
     const removeData = async(taskID, type) => {
+        if(authLevel === "Level Z")
+            return;
         if(taskID !== undefined && type !== undefined)
         await axios.post('http://localhost:4000/removeData', { id, taskID, type })
-        setRefresh((curr) => !curr)
+        setRefresh(true)
     }
     const nextLevel = async(taskID, createdBy, name, createdAt,type) => {
+        if(authLevel === "Level Z")
+            return;
         var dt = new Date();
         var completedAt = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
         await axios.post('http://localhost:4000/nextLevel', { id, taskID, createdBy, name, createdAt,type, completedAt })
-        setRefresh((curr) => !curr)
+        setRefresh(true)
     }
     const addChat = async() => {
-        await axios.post('http://localhost:4000/addChat', { id, text: chatValue, from: "Ankit", chatID: uuid() })
+        await axios.post('http://localhost:4000/addChat', { id, text: chatValue, from: sessionStorage.getItem("email"), chatID: uuid() })
         setChatValue('')
-        setRefresh((curr) => !curr)
+        setRefresh(true)
     }
     if(showModal){
         return(
         <Modal scrollable={true} ariaHideApp={false} isOpen={showModal} onRequestClose={()=>setShowModal(false) }
-        style={ 
-          { 
-            modal: {
-                backgroundColor: "green",
-            },
-            overlay: {
-              backgroundColor: theme.modalBackground
-            }, 
-            content: {
-              width:'40%',
-              height: '70%',
-              alignContent:'center',
-              marginLeft: "28%",
-              marginTop: "3%",
-              overflow: 'auto',
-              backgroundColor: theme.modalColor,
-              border: 'none'
-            }
-          }
-          }>
+        style={outerModal} >
           <div >
-            {project.members.map((curr) => (
-                    <div>
-                        <ThemeTextTypography variant="h2">{curr.name}</ThemeTextTypography>
+                {project.members.map((curr, i) => (
+                    <div key={i}>
+                        <ThemeTextTypography display="inline" style={{fontFamily: "serif"}} variant="h3">{curr.name}</ThemeTextTypography>
+                        <div style={{display: 'inline', float: "right"}}>
+                            <Button onClick={() => changeAuthLevel(curr.id, "Level X")}>{curr.authLevel === "Level X" ? <ThemeTextTypography variant="h6" style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level X</ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "fantasy"}} variant="h6">Level X</ThemeTextTypography> }</Button>
+                            <Button onClick={() => changeAuthLevel(curr.id, "Level Y")}>{curr.authLevel === "Level Y" ? <ThemeTextTypography variant="h6" style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Y</ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "fantasy"}} variant="h6">Level Y</ThemeTextTypography> }</Button>
+                            <Button onClick={() => changeAuthLevel(curr.id, "Level Z")}>{curr.authLevel === "Level Z" ? <ThemeTextTypography variant="h6" style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Z</ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "fantasy"}} variant="h6">Level Z</ThemeTextTypography> }</Button>
+                        </div>
                     </div>
-            ))}
-            
+                ))}
           </div>
           
         </Modal>

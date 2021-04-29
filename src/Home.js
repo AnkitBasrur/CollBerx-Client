@@ -35,7 +35,8 @@ function Home() {
   useEffect(async () => {
     if(shouldFetch){
       const projects = await axios.get(`http://localhost:4000/getProjects/${sessionStorage.getItem("email")}`)
-      setProjects(projects.data)
+      console.log(projects)
+      setProjects(projects.data.room)
       setShouldFetch(false)
     }
   })

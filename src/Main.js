@@ -10,6 +10,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import DoneIcon from '@material-ui/icons/Done';
 import NavBar from "./NavBar";
 import Modal from 'react-modal'
+import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 
 const { uuid } = require('uuidv4');
 const styles = {
@@ -91,8 +92,9 @@ function Main(props){
             socket.emit("new data", { data: res.data.data })
             setRefresh(false)
             socket.on("new data from server", (arg1) => {
-                console.log("fetchh")
                 setProject(arg1.data.data)
+                console.log("fetch")
+                arg1.data.data.members.map(member => {if(member.id === sessionStorage.getItem("email")) setAuthLevel(member.authLevel)} )
                 setPendingData(arg1.data.data.pending)
                 setActiveData(arg1.data.data.ongoing)
                 setCompletedData(arg1.data.data.finsished)
@@ -113,8 +115,10 @@ function Main(props){
         setRefresh(true)
     }
     const addPending = async () => {
+        console.log(authLevel, "before")
         if(authLevel === "Level Z")
             return;
+        console.log(authLevel, "after")
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
         await axios.post('http://localhost:4000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: "AB" })
@@ -183,52 +187,55 @@ function Main(props){
         return (
             <>
             <NavBar />
-            <div style={{ minHeight: "100vh", backgroundColor: theme.ui}}>
-            <ThemeTextTypography variant="h4">{project.name}</ThemeTextTypography>
-            {project.members ? <ThemeTextTypography variant="h4" onClick={() => setShowModal(true)}>{project.members.length}</ThemeTextTypography> : null }
-
+            <div style={{ minHeight: "93.5vh", backgroundColor: theme.ui}}>
+                <div style={{textAlign: "center"}}>
+                    <ThemeTextTypography display="inline" style={{fontWeight: "bold", fontFamily:"serif"}} variant="h3">{project.name}</ThemeTextTypography>
+                    <ThemeTextTypography display="inline" onClick={() => {navigator.clipboard.writeText(id)}} variant="h4">🔗</ThemeTextTypography>
+                    {project.members ?<PeopleAltIcon style={{marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
+                </div>
+            
                 <div class="search-container">
-                    <div class="search-item" style={{ backgroundColor: theme.box}}>
-                        <ThemeTextTypography variant="h4">Pending</ThemeTextTypography>
+                    <div class="search-item" style={{ backgroundColor: theme.innerBox}}>
+                        <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Pending</b></ThemeTextTypography>
                         <TextField label="Add To Pending Tasks" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
                         <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addPending}>Add</Button>
                         {pendingData.map((row) => (
                             <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                                <ThemeTextTypography variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                                 <DoneIcon style={{color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
                                 <CancelIcon style={{color: theme.text}} onClick={() => removeData(row.taskID, "Pending")} />
                             </div>
                         ))}
                     </div>
-                    <div class="search-item" style={{ backgroundColor: theme.box}}>
-                        <ThemeTextTypography variant="h4">Active</ThemeTextTypography>
+                    <div class="search-item" style={{ backgroundColor: theme.innerBox}}>
+                        <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Active</b></ThemeTextTypography>
                         <TextField label="Add To Active Tasks" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
                         <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button>
                         {activeData.length > 0 && activeData.map((row) => (
                             <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                                <ThemeTextTypography variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                                 <DoneIcon style={{color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
                                 <CancelIcon style={{color: theme.text}} onClick={() => removeData(row.taskID, "Active")} />
                             </div>
                         ))}
                     </div>
-                    <div class="search-item" style={{ backgroundColor: theme.box }}>
-                        <ThemeTextTypography variant="h4">Completed</ThemeTextTypography>
+                    <div class="search-item" style={{ backgroundColor: theme.innerBox }}>
+                        <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Completed</b></ThemeTextTypography>
                         <TextField label="Add To Completed Tasks" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
                         <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button>
                         {completedData.length > 0 && completedData.map((row) => (
                             <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                                <ThemeTextTypography variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                                 <CancelIcon style={{color: theme.text, marginLeft: "3%"}} onClick={() => removeData(row.taskID, "Completed")} />
                             </div>
                         ))}
                     </div>
-                    <div style={{marginLeft: "7%", marginRight: "5%", backgroundColor: theme.box}} class="search-item">
-                        <ThemeTextTypography variant="h4">Chat</ThemeTextTypography>
+                    <div style={{marginLeft: "7%", marginRight: "5%", backgroundColor: theme.innerBox}} class="search-item">
+                        <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Chat</b></ThemeTextTypography>
                         {chatData.length > 0 && chatData.map((row) => (
                             <div style={{ textAlign: "left"}}>
-                                <ThemeTextTypography variant="h6" display="inline" ><b>{row.from} : </b></ThemeTextTypography>
-                                <ThemeTextTypography variant="h6" display="inline" >{row.text}</ThemeTextTypography>
+                                <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h6" display="inline" ><b>{row.from} : </b></ThemeTextTypography>
+                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.text}</ThemeTextTypography>
                             </div>
                         ))}
                         <TextField label="Type Your Message Here" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={chatValue} onChange={(e) => setChatValue(e.target.value)} />

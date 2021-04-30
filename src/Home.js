@@ -7,6 +7,7 @@ import {ThemeContext} from './contexts/ThemeContext'
 import { Button, Card, CardActionArea, CardContent, Grid, TextField, Typography } from "@material-ui/core";
 import NavBar from "./NavBar";
 import axios from "axios";
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 
 const styles = {
   light: {
@@ -49,29 +50,30 @@ function Home() {
   }
   
   return (
-    <>
-    <div className="App" style={{ height: "100vh", backgroundColor:theme.ui }}>
+    <div >
     <NavBar />
-      <ThemeTextTypography variant="h4">Your Rooms:</ThemeTextTypography>
-        <Grid style={{marginLeft:"2%"}} container spacing={3}>
+    <div className="App" style={{ minHeight: "93.5vh", width: "100%", backgroundColor:theme.ui }}>
+      <ThemeTextTypography style={{fontFamily: "Verdana", marginBottom: "1%", paddingTop: "1%"}} variant="h4"><b>Your Rooms:</b></ThemeTextTypography>
+        <Grid container style={{paddingLeft: "8%"}}>
                 {projects.map((row,i)=>{
                     return(
-                        <Grid key={i} style={{marginRight:"2%"}} item xs={2}>
-                            <Card style={{boxShadow: "2px 2px 2px #575859", backgroundColor: "#353536"}} onClick={()=> handleProject(row.roomID, row.data.authLevel)}>
+                        <Grid key={i} style={{marginRight:"20px", marginBottom: "20px"}} item xs={2}>
+                            <Card style={{boxShadow: "2px 2px 2px #575859", backgroundColor: theme.innerBox}} onClick={()=> handleProject(row.roomID, row.data.authLevel)}>
                                 <CardActionArea>
                                     <CardContent>
                                     <div style={{ textAlign: "center" }}>
-                                        <ThemeTextTypography gutterBottom variant="h5">
-                                            {row.name}
+                                        <ThemeTextTypography gutterBottom style={{fontFamily: "Georgia"}} variant="h5">
+                                            <b>{row.name}</b>
                                         </ThemeTextTypography>
                                         <ThemeTextTypography variant="h6" color="textSecondary">
                                             {row.designation}
                                         </ThemeTextTypography>
-                                        <ThemeTextTypography variant="h6" color="textSecondary">
+                                        <ThemeTextTypography variant="h6" style={{color: theme.textNotImp}}>
                                             {row.data.authLevel} 
                                         </ThemeTextTypography>
-                                        <ThemeTextTypography variant="h6" color="textSecondary">
-                                            {row.members.length} members 
+                                        <FiberManualRecordIcon fontSize="small" style={{ color: "red" }} /> 
+                                        <ThemeTextTypography style={{fontSize:"25px"}}display="inline" variant="h6" color="textSecondary">
+                                            <b> {row.members.length}</b> 
                                         </ThemeTextTypography>
                                     </div>
                                     </CardContent>
@@ -83,7 +85,7 @@ function Home() {
           </Grid>
       {/* <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) =>leaveRoom(e)}>Leave Room</Button> */}
     </div>
-    </>
+    </div>
   );
 }
 

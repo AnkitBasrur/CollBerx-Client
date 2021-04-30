@@ -8,24 +8,26 @@ class ThemeContextProvider extends Component {
         light: {
             text: 'black',
             ui: '#ebe8e8',
-            box: '#dedcdc',
+            box: '#828181',
             innerBox: '#cccaca',
             button: '#d4d5d6',
             placeholder: '#949392',
             navbar: '#c7c6c5',
             modalColor: '#fcfcfc',
-            modalBackground: '#bab8b8'
+            modalBackground: '#bab8b8',
+            textNotImp: '#757474'
         },
         dark: {
             text: '#ffffff',
             ui: 'black',
             box: '#1f1f1f',
-            innerBox: 'black',
+            innerBox: '#3d3d3d',
             button: '#343536',
             placeholder: '#949392',
             navbar: '#242323',
             modalColor: '#000000',
-            modalBackground: '#454444'
+            modalBackground: '#454444',
+            textNotImp: '#c4c2c2'
         }
      }
      toggleTheme = () => { 

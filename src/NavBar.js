@@ -8,40 +8,54 @@ import MenuIcon from '@material-ui/icons/Menu';
 import {ThemeContext} from './contexts/ThemeContext'
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import { useHistory } from 'react-router-dom';
-import { useCookies } from "react-cookie";
+import { withStyles } from "@material-ui/core/styles";
 
+const styles = {
+  light: {
+      color: "black",
+      fontSize: "22px"
+  },
+  dark: {
+      color: "white",
+      fontSize: "22px"
+  }
+};
 
 function NavBar(props){
-    const [cookies, setCookie, removeCookie] = useCookies(["user"]);
     const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
     const theme = isLightTheme ? light : dark;
     const history = useHistory()
 
+    const ThemeTextTypography = withStyles({
+      root: {
+        color: theme.text
+      }
+    })(Typography);
 
-        return (
-          <div>
-            <AppBar style={{ backgroundColor:  theme.navbar }} position="static">
-              <Toolbar variant="dense" >
-                <Typography onClick={() => history.push('/home')} variant="h6" style={{ color: theme.text, marginLeft: "5%"}}>
-                  Home
-                </Typography>
-                <Typography onClick={() => history.push('/addRoom')} variant="h6" style={{ color: theme.text, marginLeft: "5%"}} color="inherit">
-                  Add Room
-                </Typography>
-                <Typography variant="h6" style={{ color: theme.text, marginLeft: "5%"}} color="inherit">
-                  Photos
-                </Typography>
-                <Typography variant="h6" style={{ color: theme.text, marginLeft: "5%"}} color="inherit">
-                  Photos
-                </Typography>
-                <Brightness4Icon style={{marginLeft: "5%"}} onClick={() => toggleTheme() }/>
-                <Typography onClick={() => { sessionStorage.removeItem("email");history.push('/') }} variant="h6" style={{ color: theme.text, marginLeft: "47%"}} color="inherit">
-                  Logout
-                </Typography>
-              </Toolbar>
-            </AppBar>
-          </div>
-        );  
+    return (
+      <div>
+        <AppBar style={{ backgroundColor:  theme.navbar }} position="static">
+          <Toolbar variant="dense" >
+            <ThemeTextTypography onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}}>
+              Home
+            </ThemeTextTypography>
+            <ThemeTextTypography onClick={() => history.push('/addRoom')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}} >
+              Add Room
+            </ThemeTextTypography>
+            <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
+              Photos
+            </ThemeTextTypography>
+            <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}} >
+              Photos
+            </ThemeTextTypography>
+            <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>
+            <ThemeTextTypography onClick={() => { sessionStorage.removeItem("email");history.push('/') }} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer",color: theme.text, marginLeft: "47%"}} >
+              Logout
+            </ThemeTextTypography>
+          </Toolbar>
+        </AppBar>
+      </div>
+    );  
 } 
 
-export default NavBar;
+export default withStyles(styles)(NavBar);

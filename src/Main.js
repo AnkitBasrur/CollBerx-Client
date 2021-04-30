@@ -11,6 +11,7 @@ import DoneIcon from '@material-ui/icons/Done';
 import NavBar from "./NavBar";
 import Modal from 'react-modal'
 import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 const { uuid } = require('uuidv4');
 const styles = {
@@ -190,43 +191,40 @@ function Main(props){
             <div style={{ minHeight: "93.5vh", backgroundColor: theme.ui}}>
                 <div style={{textAlign: "center"}}>
                     <ThemeTextTypography display="inline" style={{fontWeight: "bold", fontFamily:"serif"}} variant="h3">{project.name}</ThemeTextTypography>
-                    <ThemeTextTypography display="inline" onClick={() => {navigator.clipboard.writeText(id)}} variant="h4">🔗</ThemeTextTypography>
-                    {project.members ?<PeopleAltIcon style={{marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
+                    <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id)}} variant="h4">🔗</ThemeTextTypography>
+                    {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
                 </div>
             
                 <div class="search-container">
                     <div class="search-item" style={{ backgroundColor: theme.innerBox}}>
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Pending</b></ThemeTextTypography>
-                        <TextField label="Add To Pending Tasks" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
-                        <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addPending}>Add</Button>
+                        <TextField label="Add Pending Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addPending}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
                         {pendingData.map((row) => (
                             <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
-                                <DoneIcon style={{color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
-                                <CancelIcon style={{color: theme.text}} onClick={() => removeData(row.taskID, "Pending")} />
+                                <DoneIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
+                                <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Pending")} />
                             </div>
                         ))}
                     </div>
                     <div class="search-item" style={{ backgroundColor: theme.innerBox}}>
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Active</b></ThemeTextTypography>
-                        <TextField label="Add To Active Tasks" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
-                        <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button>
+                        <TextField label="Add Active Task" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
                         {activeData.length > 0 && activeData.map((row) => (
                             <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
-                                <DoneIcon style={{color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
-                                <CancelIcon style={{color: theme.text}} onClick={() => removeData(row.taskID, "Active")} />
+                                <DoneIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
+                                <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Active")} />
                             </div>
                         ))}
                     </div>
                     <div class="search-item" style={{ backgroundColor: theme.innerBox }}>
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Completed</b></ThemeTextTypography>
-                        <TextField label="Add To Completed Tasks" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
-                        <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button>
+                        <TextField label="Add Completed Task" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
                         {completedData.length > 0 && completedData.map((row) => (
                             <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
-                                <CancelIcon style={{color: theme.text, marginLeft: "3%"}} onClick={() => removeData(row.taskID, "Completed")} />
+                                <ThemeTextTypography style={{ fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                <CancelIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => removeData(row.taskID, "Completed")} />
                             </div>
                         ))}
                     </div>
@@ -238,9 +236,7 @@ function Main(props){
                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.text}</ThemeTextTypography>
                             </div>
                         ))}
-                        <TextField label="Type Your Message Here" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button }} value={chatValue} onChange={(e) => setChatValue(e.target.value)} />
-                        <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={addChat}>Send</Button>
-                        
+                        <TextField label="Type Your Message" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addChat}>Send</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={chatValue} onChange={(e) => setChatValue(e.target.value)} />                        
                     </div>
                 </div>
             </div>

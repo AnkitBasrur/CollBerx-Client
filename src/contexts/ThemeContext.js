@@ -16,7 +16,8 @@ class ThemeContextProvider extends Component {
             navbar: '#c7c6c5',
             modalColor: '#fcfcfc',
             modalBackground: '#bab8b8',
-            textNotImp: '#757474'
+            textNotImp: '#757474',
+            box: '#b8b9ba'
         },
         dark: {
             text: '#ffffff',
@@ -29,7 +30,8 @@ class ThemeContextProvider extends Component {
             navbar: '#242323',
             modalColor: '#000000',
             modalBackground: '#454444',
-            textNotImp: '#c4c2c2'
+            textNotImp: '#c4c2c2',
+            box: 'gray'
         }
      }
      toggleTheme = () => { 

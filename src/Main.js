@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { withStyles } from "@material-ui/core/styles";
 import { Button, TextField, Typography } from "@material-ui/core";
@@ -26,6 +26,7 @@ const styles = {
 };
 const socket = io("http://localhost:5000/");
 function Main(props){
+    const divRef = useRef(null)
     let { id } = useParams();
     const { isLightTheme, light, dark } = useContext(ThemeContext);
     const theme = isLightTheme ? light : dark;
@@ -49,24 +50,7 @@ function Main(props){
             border: 'none'
         }
     }
-    const innerModal = { 
-        modal: {
-            backgroundColor: "green",
-        },
-        overlay: {
-            backgroundColor: theme.modalBackground
-        }, 
-        content: {
-            width:'10%',
-            height: '10%',
-            alignContent:'center',
-            marginLeft: "28%",
-            marginTop: "3%",
-            overflow: 'auto',
-            backgroundColor: theme.modalColor,
-            border: 'none'
-        }
-    }
+    
     const [completedValue, setCompletedValue] = useState('');
     const [pendingValue, setPendingValue] = useState('');
     const [activeValue, setActiveValue] = useState('');
@@ -100,6 +84,7 @@ function Main(props){
                 setActiveData(arg1.data.data.ongoing)
                 setCompletedData(arg1.data.data.finsished)
                 setChatData(arg1.data.data.chat);
+                divRef.current.scrollIntoView({ behavior: 'smooth', block: 'end'});
             });
             socket.on("Hey", (arg1) => {
 
@@ -195,8 +180,8 @@ function Main(props){
                     {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
                 </div>
             
-                <div class="search-container">
-                    <div class="search-item" style={{ backgroundColor: theme.innerBox}}>
+                <div class="search-container" style={{minHeight: "30vh"}}>
+                <div class="search-item" style={{ minHeight: "60%", backgroundColor: theme.innerBox}}>
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Pending</b></ThemeTextTypography>
                         <TextField label="Add Pending Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addPending}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
                         {pendingData.map((row) => (
@@ -207,7 +192,7 @@ function Main(props){
                             </div>
                         ))}
                     </div>
-                    <div class="search-item" style={{ backgroundColor: theme.innerBox}}>
+                    <div class="search-item" style={{ minHeight: "60%", backgroundColor: theme.innerBox}}>
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Active</b></ThemeTextTypography>
                         <TextField label="Add Active Task" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
                         {activeData.length > 0 && activeData.map((row) => (
@@ -218,7 +203,7 @@ function Main(props){
                             </div>
                         ))}
                     </div>
-                    <div class="search-item" style={{ backgroundColor: theme.innerBox }}>
+                <div class="search-item" style={{ minHeight: "60%", backgroundColor: theme.innerBox }}>
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Completed</b></ThemeTextTypography>
                         <TextField label="Add Completed Task" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
                         {completedData.length > 0 && completedData.map((row) => (
@@ -228,15 +213,19 @@ function Main(props){
                             </div>
                         ))}
                     </div>
-                    <div style={{marginLeft: "7%", marginRight: "5%", backgroundColor: theme.innerBox}} class="search-item">
+                    <div style={{ maxHeight: "50vh", minHeight: "50vh", marginLeft: "7%", marginRight: "5%", backgroundColor: theme.innerBox}} class="search-item">
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Chat</b></ThemeTextTypography>
-                        {chatData.length > 0 && chatData.map((row) => (
-                            <div style={{ textAlign: "left"}}>
-                                <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h6" display="inline" ><b>{row.from} : </b></ThemeTextTypography>
-                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.text}</ThemeTextTypography>
-                            </div>
-                        ))}
-                        <TextField label="Type Your Message" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addChat}>Send</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={chatValue} onChange={(e) => setChatValue(e.target.value)} />                        
+                        <div style={{overflowY: "auto", maxHeight: "80%", overflowX: "hidden"}}>
+                            {chatData.length > 0 && chatData.map((row) => (
+                                <div style={{ textAlign: "left"}}>
+                                    <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h6" display="inline" ><b>{row.from} : </b></ThemeTextTypography>
+                                    <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.text}</ThemeTextTypography>
+                                </div>
+                            ))}
+                            <div ref={divRef} className="list-bottom"></div>
+                        </div>
+                        <TextField label="Type Your Message" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addChat}>Send</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ position: "fixed", bottom: "27%", right: "4.8%", backgroundColor: theme.input }} value={chatValue} onChange={(e) => setChatValue(e.target.value)} />                        
+
                     </div>
                 </div>
             </div>

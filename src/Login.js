@@ -5,8 +5,8 @@ import { useContext } from "react"
 import { withStyles } from "@material-ui/core/styles";
 import {ThemeContext} from './contexts/ThemeContext'
 import { Box, Button, TextField, Typography } from "@material-ui/core";
-import NavBar from "./NavBar";
 import { useCookies } from "react-cookie";
+import LoginNavBar from "./LoginNavBar";
 
 const styles = {
     light: {
@@ -92,19 +92,19 @@ function Login(props){
         }
     }
     return (
-        <>
-        <div style={{ paddingBottom: "10%", minHeight: "100vh", backgroundColor: theme.ui}}>
-            <div style={{marginLeft: "20%", paddingTop:"10%", width:"40%", height:"60%", backgroundColor: "brown"}}>
+        <div style={{ paddingBottom: "10%", minHeight: "79.5vh", backgroundColor: theme.ui}}>
+        <LoginNavBar />
+            <div style={{ borderRadius:"15px", marginLeft:"35%", marginTop:"10%", width:"28%", backgroundColor: theme.box, textAlign: "center"}}>
             
-            <Button onClick={() => setShowLogin(curr => !curr)} style={{backgroundColor: theme.button, color: theme.text }}>Show Login</Button>
-            <Button onClick={() => setShowSignup(curr => !curr)} style={{backgroundColor: theme.button, color: theme.text }}>Show Sign Up</Button>
+            <Button onClick={() => { setShowSignup(false); setShowLogin(true) }} style={{ width: "50%", borderRadius:"0", backgroundColor: theme.innerBox, color: theme.text }}>Show Login</Button>
+            <Button onClick={() => {setShowLogin(false); setShowSignup(true) }} style={{ width: "50%", borderRadius:"0", backgroundColor: theme.innerBox, color: theme.text }}>Show Sign Up</Button>
                 {showLogin ?
                 <form>
-                    <ThemeTextTypography variant="h4"><b>Log In</b></ThemeTextTypography>
-                    <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" label="Enter Email" style={{backgroundColor: theme.input }} value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}/><br /><br />
-                    <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="password" label="Enter Password" style={{backgroundColor: theme.input }} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)}/><br /><br />
-                    <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => loginFunction(e)}>Submit</Button>
-                    <ThemeTextTypography variant="h5" style={{color: "tomato"}}>{errorMessage}</ThemeTextTypography>
+                    <ThemeTextTypography variant="h4" style={{ fontFamily: "DejaVu Sans Mono", marginTop: "3%"}}><b>Log In</b></ThemeTextTypography>
+                    <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" label="Enter Email" style={{marginTop: "5%", backgroundColor: theme.input }} value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}/><br /><br />
+                    <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="password" label="Enter Password" style={{marginTop: "5%", backgroundColor: theme.input }} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)}/><br /><br />
+                    <Button type="submit" style={{marginTop: "5%", backgroundColor: theme.innerBox, color: theme.text }} onClick={(e) => loginFunction(e)}>Submit</Button>
+                    <ThemeTextTypography variant="h5" style={{ color: "tomato"}}>{errorMessage}</ThemeTextTypography>
                 </form> : null }
                 
                 {showSignup ?
@@ -113,12 +113,11 @@ function Login(props){
                     <TextField type="text" label="Enter Your Name" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={signupName} onChange={(e) => setSignupName(e.target.value)}/><br /><br />
                     <TextField type="text" label="Enter Email" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)}/><br /><br />
                     <TextField type="password" label="Enter Password" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)}/><br /><br />
-                    <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => signUpFunction(e)}>Submit</Button>
+                    <Button type="submit" style={{backgroundColor: theme.innerBox, color: theme.text }} onClick={(e) => signUpFunction(e)}>Submit</Button>
                     <ThemeTextTypography variant="h5" style={{color: "tomato"}}>{signUpErrorMessage}</ThemeTextTypography>
                 </form> : null }
             </div>
         </div>
-        </>
     )
 }
 

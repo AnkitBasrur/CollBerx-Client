@@ -108,7 +108,7 @@ function Main(props){
         console.log(authLevel, "after")
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
-        await axios.post('http://localhost:4000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: "AB" })
+        await axios.post('http://localhost:4000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setPendingValue('')
     }
@@ -117,7 +117,7 @@ function Main(props){
             return;
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
-        await axios.post('http://localhost:4000/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: "AB", completedAt: date })
+        await axios.post('http://localhost:4000/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("email"), completedAt: date })
         setRefresh(true)
         setCompletedValue('')
     }
@@ -126,16 +126,17 @@ function Main(props){
             return;
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
-        await axios.post('http://localhost:4000/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: "AB" })
+        await axios.post('http://localhost:4000/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setActiveValue('')
     }
     const removeData = async(taskID, type) => {
         if(authLevel === "Level Z")
             return;
-        if(taskID !== undefined && type !== undefined)
-        await axios.post('http://localhost:4000/removeData', { id, taskID, type })
-        setRefresh(true)
+        if(taskID !== undefined && type !== undefined){
+            await axios.post('http://localhost:4000/removeData', { id, taskID, type })
+            setRefresh(true)
+        }
     }
     const nextLevel = async(taskID, createdBy, name, createdAt,type) => {
         if(authLevel === "Level Z")
@@ -150,12 +151,11 @@ function Main(props){
         setChatValue('')
         setRefresh(true)
     }
-    const onDragEnd = (result, project, setProject) => {
+    const onDragEnd = async(result) => {
         if(!result.destination) return;
-        console.log(result)
-        const { source, destination } = result;
-        // const column = columns[source.droppableId];
-        // const copiedItems = 
+        const { source, destination, droppableId } = result;
+        await axios.post('http://localhost:4000/drag', {source, destination, draggableId: result.draggableId, id});
+        setRefresh(true)
 
     }
     if(showModal){
@@ -188,7 +188,7 @@ function Main(props){
                     <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id)}} variant="h4">🔗</ThemeTextTypography>
                     {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
                 </div>
-                <DragDropContext onDragEnd={result => onDragEnd(result, project, setProject)}>
+                <DragDropContext onDragEnd={result => onDragEnd(result)}>
 
                 <div class="search-container" style={{ minHeight: "30vh"}}>
                 <div class="search-item" style={{  maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>

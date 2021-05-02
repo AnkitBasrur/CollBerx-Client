@@ -41,3 +41,11 @@ code {
 ::-webkit-scrollbar-thumb:hover {
   background: #555; 
 }
+
+.data-item:hover{
+  background-color: rgb(141, 141, 146);
+  cursor: pointer;
+}
+.nav-list:hover {
+  background-color: rgb(99, 99, 99)
+}

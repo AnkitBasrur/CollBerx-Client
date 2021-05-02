@@ -36,7 +36,7 @@ function NavBar(props){
       <div>
         <AppBar style={{ backgroundColor:  theme.navbar }} position="static">
           <Toolbar variant="dense" >
-            <ThemeTextTypography onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}}>
+            <ThemeTextTypography className="nav-list" onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}}>
               Home
             </ThemeTextTypography>
             <ThemeTextTypography onClick={() => history.push('/addRoom')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}} >

@@ -6,7 +6,6 @@ import Home from "./Home";
 import Main from "./Main";
 import Login from "./Login";
 import ThemeContextProvider from "./contexts/ThemeContext";
-import NavBar from "./NavBar";
 import AddRoom from "./AddRoom";
 
 function App() {

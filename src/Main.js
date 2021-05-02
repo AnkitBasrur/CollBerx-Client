@@ -12,6 +12,7 @@ import NavBar from "./NavBar";
 import Modal from 'react-modal'
 import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const { uuid } = require('uuidv4');
 const styles = {
@@ -149,6 +150,14 @@ function Main(props){
         setChatValue('')
         setRefresh(true)
     }
+    const onDragEnd = (result, project, setProject) => {
+        if(!result.destination) return;
+        console.log(result)
+        const { source, destination } = result;
+        // const column = columns[source.droppableId];
+        // const copiedItems = 
+
+    }
     if(showModal){
         return(
         <Modal scrollable={true} ariaHideApp={false} isOpen={showModal} onRequestClose={()=>setShowModal(false) }
@@ -179,47 +188,187 @@ function Main(props){
                     <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id)}} variant="h4">🔗</ThemeTextTypography>
                     {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
                 </div>
-            
+                <DragDropContext onDragEnd={result => onDragEnd(result, project, setProject)}>
+
                 <div class="search-container" style={{ minHeight: "30vh"}}>
-                <div class="search-item" style={{ maxHeight: "60vh", minHeight: "50vh", backgroundColor: theme.innerBox}}>
-                        <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Pending</b></ThemeTextTypography>
-                        <TextField label="Add Pending Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addPending}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
-                        <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "80%", overflowX: "hidden"}}>
-                            {pendingData.map((row) => (
-                                <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                                    <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
-                                    <DoneIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
-                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Pending")} />
-                                </div>
-                            ))}
-                        </div>
+                <div class="search-item" style={{  maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
+                <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Pending</b></ThemeTextTypography>
+                <TextField label="Add Pending Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addPending}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
+                <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
+                <Droppable key="Pending" droppableId="Pending">
+                {(provided, snapshot) => {
+                    return (
+                        <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        style={{
+                          background: theme.innerBox,
+                          padding: 4,
+                          width: "100%"
+                        }}
+                      >
+                                {pendingData.map((row,i) => (
+                                    <div style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
+                                    <Draggable
+                                        key={row.taskID}
+                                        draggableId={row.taskID}
+                                        index={i}
+                                    >
+                                    {(provided, snapshot) => {
+                                        return (
+                                                <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                style={{
+                                                userSelect: "none",
+                                                padding: 16,
+                                                margin: "0 0 8px 0",
+                                                minHeight: "50px",
+                                                backgroundColor: snapshot.isDragging
+                                                    ? "#7d7c7c"
+                                                    : "#545353",
+                                                color: "white",
+                                                ...provided.draggableProps.style
+                                                }}
+                                            >
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                                <DoneIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
+                                                <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Pending")} />
+                                            </div>
+                                        );
+                                    }}
+                                    </Draggable>
+                                    </div>
+                                ))}
+                                
+                        {provided.placeholder}
+                      </div>                        
+                    );
+                    }}
+                    </Droppable>
+                    </div>
+                    </div>
+                    <div class="search-item" style={{ maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
+                <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Active</b></ThemeTextTypography>
+                <TextField label="Add Active Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
+                <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
+                    <Droppable key="Active" droppableId="Active">
+                {(provided, snapshot) => {
+                    return (
+                        <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        style={{
+                          background: theme.innerBox,
+                          padding: 4,
+                          width: "100%",
+                          overflowY: "none"
+                        }}
+                      >
+                                {activeData.map((row,i) => (
+                                    <Draggable
+                                        key={row.taskID}
+                                        draggableId={row.taskID}
+                                        index={i}
+                                    >
+                                    {(provided, snapshot) => {
+                                        return (
+                                                <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                style={{
+                                                    overflowY: "auto",
+                                                userSelect: "none",
+                                                padding: 16,
+                                                margin: "0 0 8px 0",
+                                                minHeight: "50px",
+                                                backgroundColor: snapshot.isDragging
+                                                    ? "#7d7c7c"
+                                                    : "#545353",
+                                                color: "white",
+                                                ...provided.draggableProps.style
+                                                }}
+                                            >
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                                <DoneIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
+                                                <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Active")} />
+                                            </div>
+                                        );
+                                    }}
+                                    </Draggable>
+                                ))}
+                                
+                        {provided.placeholder}
+                      </div>
                         
+                        
+                    );
+                    }}
+                    </Droppable>
                     </div>
-                    <div class="search-item" style={{ maxHeight: "60vh", minHeight: "50vh", backgroundColor: theme.innerBox}}>
-                        <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Active</b></ThemeTextTypography>
-                        <TextField label="Add Active Task" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
-                        <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "80%",overflowX: "hidden"}}>
-                            {activeData.length > 0 && activeData.map((row) => (
-                                <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                                    <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
-                                    <DoneIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
-                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Active")} />
-                                </div>
-                            ))}
-                        </div>
                     </div>
-                <div class="search-item" style={{ maxHeight: "60vh", minHeight: "50vh", backgroundColor: theme.innerBox }}>
-                        <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Completed</b></ThemeTextTypography>
-                        <TextField label="Add Completed Task" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.input }} value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
-                        <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "80%", overflowX: "hidden"}}>
-                            {completedData.length > 0 && completedData.map((row) => (
-                                <div key={row.taskID} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}}>
-                                    <ThemeTextTypography style={{ fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
-                                    <CancelIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => removeData(row.taskID, "Completed")} />
-                                </div>
-                            ))}
-                        </div>
+                    <div class="search-item" style={{  maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
+                <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Completed</b></ThemeTextTypography>
+                <TextField label="Add Completed Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
+                <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
+                    <Droppable key="Completed" droppableId="Completed">
+                {(provided, snapshot) => {
+                    return (
+                        <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        style={{
+                          background: theme.innerBox,
+                          padding: 4,
+                          width: "100%",
+                          overflowY: "none"
+                        }}
+                      >
+                                {completedData.map((row,i) => (
+                                    <Draggable
+                                        key={row.taskID}
+                                        draggableId={row.taskID}
+                                        index={i}
+                                    >
+                                    {(provided, snapshot) => {
+                                        return (
+                                                <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                style={{
+                                                    overflowY: "auto",
+                                                userSelect: "none",
+                                                padding: 16,
+                                                margin: "0 0 8px 0",
+                                                minHeight: "50px",
+                                                backgroundColor: snapshot.isDragging
+                                                    ? "#7d7c7c"
+                                                    : "#545353",
+                                                color: "white",
+                                                ...provided.draggableProps.style
+                                                }}
+                                            >
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                                <CancelIcon style={{ cursor: "pointer", marginLeft: "3%", color: theme.text}} onClick={() => removeData(row.taskID, "Completed")} />
+                                            </div>
+                                        );
+                                    }}
+                                    </Draggable>
+                                ))}
+                                
+                        {provided.placeholder}
+                      </div>
+                        
+                        
+                    );
+                    }}
+                    </Droppable>
                     </div>
+                    </div>
+
                     <div style={{ maxHeight: "50vh", minHeight: "50vh", marginLeft: "7%", marginRight: "5%", backgroundColor: theme.innerBox}} class="search-item">
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Chat</b></ThemeTextTypography>
                         <div style={{overflowY: "auto", maxHeight: "80%", overflowX: "hidden"}}>
@@ -234,6 +383,7 @@ function Main(props){
                         <TextField label="Type Your Message" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addChat}>Send</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ position: "fixed", bottom: "27%", right: "4.8%", backgroundColor: theme.input }} value={chatValue} onChange={(e) => setChatValue(e.target.value)} />                        
                     </div>
                 </div>
+                </DragDropContext>
             </div>
             </>
         )

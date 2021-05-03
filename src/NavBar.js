@@ -36,17 +36,17 @@ function NavBar(props){
       <div>
         <AppBar style={{ backgroundColor:  theme.navbar }} position="static">
           <Toolbar variant="dense" >
-            <ThemeTextTypography className="nav-list" onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}}>
+            <ThemeTextTypography  onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}}>
               Home
             </ThemeTextTypography>
             <ThemeTextTypography onClick={() => history.push('/addRoom')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}} >
               Add Room
             </ThemeTextTypography>
             <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
-              Photos
+              ....
             </ThemeTextTypography>
             <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}} >
-              Photos
+              ....
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>
             <ThemeTextTypography onClick={() => { sessionStorage.removeItem("email");history.push('/') }} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer",color: theme.text, marginLeft: "47%"}} >

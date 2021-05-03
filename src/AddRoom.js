@@ -21,9 +21,8 @@ const styles = {
   }
 };
 
-const socket = io("http://localhost:5000/");
+const socket = io("https://rooms-server-side.herokuapp.com/");
 function AddRoom(props) {
-  const [cookies, setCookie, removeCookie] = useCookies(["user"]);
   const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;
   const history = useHistory()
@@ -32,10 +31,9 @@ function AddRoom(props) {
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [newRoomPassword, setNewRoomPassword] = useState('');
-  const [activeUsers, setActiveUsers] = useState('');
   const [newRoomName, setNewRoomName] = useState('');
-  const [projects, setProjects] = useState([]);
-  const [shouldFetch, setShouldFetch] = useState(true)
+  const [joinRoomError, setJoinRoomError] = useState('');
+  const [createRoomError, setCreateRoomError] = useState('');
 
   const ThemeTextTypography = withStyles({
       root: {
@@ -54,27 +52,15 @@ function AddRoom(props) {
 
 
   useEffect(async () => {
-    if(shouldFetch){
-      const projects = await axios.get(`http://localhost:4000/getProjects/${sessionStorage.getItem("email")}`)
-      setProjects(projects.data)
-      setShouldFetch(false)
-    }
+    
     socket.on("Hey", (arg1) => {
       if(arg1.msg === "Success"){
           if(arg1.roomID){
             setCode(arg1.roomID)
-            setActiveUsers(arg1.activeUsers)
             history.push({
               pathname: `/main/${arg1.roomID}`,
-              state: { roomID: arg1.roomID, activeUsers: arg1.activeUsers}
+              state: { roomID: arg1.roomID}
             }); 
-        }
-        else{
-          setActiveUsers(arg1.activeUsers)
-          // history.push({
-          //   pathname: `/main/${arg1.roomID}`,
-          //   state: { roomID: code, activeUsers }
-          // }); 
         }
       }
     });
@@ -82,44 +68,67 @@ function AddRoom(props) {
 
   function joinRoom(e){
     e.preventDefault();
+    if(code.length == 0 || password.length == 0){
+      setJoinRoomError("Please enter all fields");
+      setTimeout(() => {
+          setJoinRoomError("");
+      }, 5000)
+      return;
+    }
     socket.emit('join', code, password, sessionStorage.getItem("email"));    
   }
 
   function createRoom(e){
     e.preventDefault();
+    if(newRoomPassword.length == 0 || newRoomName.length == 0){
+      setCreateRoomError("Please enter all fields");
+      setTimeout(() => {
+          setCreateRoomError("");
+      }, 5000)
+      return;
+    }
     socket.emit("create room", newRoomPassword, sessionStorage.getItem("email"), newRoomName);
   }
   
   return (
     <>
     <NavBar />
-    <div className="App" style={{ height: "100vh", backgroundColor:theme.ui }}>
-    <ThemeTextTypography variant="h4">Join Room</ThemeTextTypography>
-      <form>
-        <ThemeTextTypography display="inline" style={{ color: theme.text}}>
-          Enter RoomId:
-        </ThemeTextTypography> 
-        <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" style={{backgroundColor: theme.button, color: theme.text }} value={code} onChange={(e) => setCode(e.target.value)}/><br /><br />
-        <ThemeTextTypography display="inline" style={{ color: theme.text}}>
-          Enter Room Password:
-        </ThemeTextTypography> 
-        <TextField type="password" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, textColor: theme.text }} value={password} onChange={(e) => setPassword(e.target.value)}/><br /><br />
-        <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => joinRoom(e)} value="Submit">Submit</Button>
-      </form><br />
-      <ThemeTextTypography variant="h4">Create New Room</ThemeTextTypography>
-      <form>
-      <ThemeTextTypography display="inline" style={{ color: theme.text}}>
-        Enter Room Name:
-      </ThemeTextTypography>
-      <TextField type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, color: "white" }} value={newRoomName} onChange={(e) => setNewRoomName(e.target.value)}/><br /><br />
-      <ThemeTextTypography display="inline" style={{ color: theme.text}}>
-        Enter Room Password:
-      </ThemeTextTypography>
-      <TextField type="password" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, color: "white" }} value={newRoomPassword} onChange={(e) => setNewRoomPassword(e.target.value)}/><br /><br />
-        <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => createRoom(e)} value="Submit">Submit</Button><br /><br />
-      </form>
-      
-      {/* <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) =>leaveRoom(e)}>Leave Room</Button> */}
+    <div className="App" style={{ display:"flex", height: "93.5vh", backgroundColor:theme.ui }}>
+      <div style={{width:"50%", marginTop:"3%"}}>
+        <div style={{marginLeft:"20%", paddingTop:"5%", height:"40%", marginRight:"20%", backgroundColor: theme.innerBox}}>
+          <ThemeTextTypography variant="h4">Join Room</ThemeTextTypography>
+          <form>
+              <ThemeTextTypography display="inline" style={{ color: theme.text }}>
+                Enter RoomId:
+              </ThemeTextTypography> 
+              <TextField InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} type="text" style={{backgroundColor: theme.button, color: theme.text }} value={code} onChange={(e) => setCode(e.target.value)}/><br /><br />
+              <ThemeTextTypography display="inline" style={{ color: theme.text}}>
+                Enter Room Password:
+              </ThemeTextTypography> 
+              <TextField type="password" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, textColor: theme.text }} value={password} onChange={(e) => setPassword(e.target.value)}/><br /><br />
+              <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => joinRoom(e)} value="Submit">Submit</Button><br />
+              {joinRoomError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{joinRoomError}</b></ThemeTextTypography> : null}
+          </form>
+        </div>
+      </div>
+      <div style={{width:"50%", marginTop:"3%"}}>
+        <div style={{marginLeft:"20%", paddingTop:"5%", height:"40%", marginRight:"20%", backgroundColor: theme.innerBox}}>
+          <ThemeTextTypography variant="h4">Create New Room</ThemeTextTypography>
+            <form>
+              <ThemeTextTypography display="inline" style={{ color: theme.text}}>
+                Enter Room Name:
+              </ThemeTextTypography>
+              <TextField type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, color: "white" }} value={newRoomName} onChange={(e) => setNewRoomName(e.target.value)}/><br /><br />
+              <ThemeTextTypography display="inline" style={{ color: theme.text}}>
+                Enter Room Password:
+              </ThemeTextTypography>
+              <TextField type="password" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ className: isLightTheme ? classes.light: classes.dark }} style={{backgroundColor: theme.button, color: "white" }} value={newRoomPassword} onChange={(e) => setNewRoomPassword(e.target.value)}/><br /><br />
+              <Button type="submit" style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) => createRoom(e)} value="Submit">Submit</Button><br /><br />
+              {createRoomError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{createRoomError}</b></ThemeTextTypography> : null}
+            </form>
+        </div>
+      </div>
+        
     </div>
     </>
   );

@@ -52,7 +52,7 @@ function Login(props){
             }, 5000)
             return
         }
-        const res = await axios.post('http://localhost:4000/login', { email: loginEmail, password: loginPassword} )
+        const res = await axios.post('https://rooms-server-side.herokuapp.com/login', { email: loginEmail, password: loginPassword} )
         if(res.data.message === 'Success'){
             sessionStorage.setItem('email', loginEmail)
             setCookie("email", loginEmail, { path: '/' });
@@ -78,7 +78,7 @@ function Login(props){
             }, 5000)
             return
         }
-        const res = await axios.post('http://localhost:4000/signup', { name: signupName, email: signupEmail, password: signupPassword} )
+        const res = await axios.post('https://rooms-server-side.herokuapp.com/signup', { name: signupName, email: signupEmail, password: signupPassword} )
         if(res.data.message === 'Success'){
             sessionStorage.setItem('email', signupEmail)
             setCookie("email", signupEmail, { path: '/'});

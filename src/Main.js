@@ -25,7 +25,7 @@ const styles = {
         fontSize: "22px"
     }
 };
-const socket = io("http://localhost:5000/");
+const socket = io("https://rooms-server-side.herokuapp.com/");
 function Main(props){
     const divRef = useRef(null)
     let { id } = useParams();
@@ -64,6 +64,11 @@ function Main(props){
     const [authLevel, setAuthLevel] = useState('')
     const [showModal, setShowModal] = useState(false)
     const [project, setProject] = useState("");
+    const [pendingError, setPendingError] = useState('');
+    const [activeError, setActiveError] = useState('');
+    const [completedError, setCompletedError] = useState('');
+    const [changeAuthError, setChangeAuthError] = useState('');
+    const [chatError, setChatError] = useState('');
 
     const ThemeTextTypography = withStyles({
         root: {
@@ -73,7 +78,7 @@ function Main(props){
 
     useEffect(() => {
         const fetchData = async() => {
-            const res = await axios.get(`http://localhost:4000/getPendingData/${id}/${sessionStorage.getItem("email")}`)
+            const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("email")}`)
             setAuthLevel(res.data.authLevel)
             socket.emit("new data", { data: res.data.data })
             setRefresh(false)
@@ -92,71 +97,164 @@ function Main(props){
     }, [refresh])
 
     const changeAuthLevel = async(user, level) => {
-        if(authLevel !== "Level X" || user === sessionStorage.getItem("email")) 
-            return
-        await axios.post('http://localhost:4000/changeAuth', {id, user, level});
+        if(user === sessionStorage.getItem("email")){
+            setChangeAuthError("Cannot change your own level");
+            setTimeout(() => {
+                setChangeAuthError("");
+            }, 5000)
+            return;
+        }
+        if(authLevel !== "Level X") {
+            setChangeAuthError("You dont have required permission");
+            setTimeout(() => {
+                setChangeAuthError("");
+            }, 5000)
+            return;
+        }
+        await axios.post('https://rooms-server-side.herokuapp.com/changeAuth', {id, user, level});
         setRefresh(true)
     }
     const addPending = async () => {
-        if(authLevel === "Level Z")
+        if(activeValue.length === 0) {
+            setPendingError("Invalid task entered");
+            setTimeout(() => {
+                setPendingError("");
+            }, 5000)
             return;
+        }
+        if(authLevel === "Level Z"){
+            setPendingError("You dont have required permission");
+            setTimeout(() => {
+                setPendingError("");
+            }, 5000)
+            return;
+        }
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
-        await axios.post('http://localhost:4000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
+        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setPendingValue('')
     }
     const addCompleted = async() => {
-        if(authLevel === "Level Z")
+        if(activeValue.length === 0) {
+            setCompletedError("Invalid task entered");
+            setTimeout(() => {
+                setCompletedError("");
+            }, 5000)
             return;
+        }
+        if(authLevel === "Level Z"){
+            setCompletedError("You dont have required permission");
+            setTimeout(() => {
+                setCompletedError("");
+            }, 5000)
+            return;
+        }
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
-        await axios.post('http://localhost:4000/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("email"), completedAt: date })
+        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("email"), completedAt: date })
         setRefresh(true)
         setCompletedValue('')
     }
     const addActive = async() => {
-        if(authLevel === "Level Z")
+        if(activeValue.length === 0) {
+            setActiveError("Invalid task entered");
+            setTimeout(() => {
+                setActiveError("");
+            }, 5000)
             return;
+        }
+        if(authLevel === "Level Z"){
+            setActiveError("You dont have required permission");
+            setTimeout(() => {
+                setActiveError("");
+            }, 5000)
+            return;
+        }
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
-        await axios.post('http://localhost:4000/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
+        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setActiveValue('')
     }
     const removeData = async(taskID, type) => {
-        if(authLevel === "Level Z")
+        if(authLevel === "Level Z"){
+            if(type === "Pending"){
+                setPendingError("You dont have required permission");
+                setTimeout(() => {
+                    setPendingError("");
+                }, 5000)
+            }
+            else if(type === "Active"){
+                setActiveError("You dont have required permission");
+                setTimeout(() => {
+                    setActiveError("");
+                }, 5000)
+            }
+            else{
+                setCompletedError("You dont have required permission");
+                setTimeout(() => {
+                    setCompletedError("");
+                }, 5000)
+            }
             return;
+        }
         if(taskID !== undefined && type !== undefined){
-            await axios.post('http://localhost:4000/removeData', { id, taskID, type })
+            await axios.post('https://rooms-server-side.herokuapp.com/removeData', { id, taskID, type })
             setRefresh(true)
         }
     }
     const nextLevel = async(taskID, createdBy, name, createdAt,type) => {
-        if(authLevel === "Level Z")
+        if(authLevel === "Level Z"){
+            if(type === "Pending"){
+                setPendingError("You dont have required permission");
+                setTimeout(() => {
+                    setPendingError("");
+                }, 5000)
+            }
+            else if(type === "Active"){
+                setActiveError("You dont have required permission");
+                setTimeout(() => {
+                    setActiveError("");
+                }, 5000)
+            }
+            else{
+                setCompletedError("You dont have required permission");
+                setTimeout(() => {
+                    setCompletedError("");
+                }, 5000)
+            }
             return;
+        }
         var dt = new Date();
         var completedAt = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
-        await axios.post('http://localhost:4000/nextLevel', { id, taskID, createdBy, name, createdAt,type, completedAt })
+        await axios.post('https://rooms-server-side.herokuapp.com/nextLevel', { id, taskID, createdBy, name, createdAt,type, completedAt })
         setRefresh(true)
     }
     const addChat = async() => {
-        await axios.post('http://localhost:4000/addChat', { id, text: chatValue, from: sessionStorage.getItem("email"), chatID: uuid() })
+        if(chatValue.length === 0) {
+            setChatError("Invalid message");
+            setTimeout(() => {
+                setChatError("");
+            }, 5000)
+            return;
+        }
+        await axios.post('https://rooms-server-side.herokuapp.com/addChat', { id, text: chatValue, from: sessionStorage.getItem("email"), chatID: uuid() })
         setChatValue('')
         setRefresh(true)
     }
     const onDragEnd = async(result) => {
         if(!result.destination) return;
         const { source, destination, droppableId } = result;
-        await axios.post('http://localhost:4000/drag', {source, destination, draggableId: result.draggableId, id});
+        await axios.post('https://rooms-server-side.herokuapp.com/drag', {source, destination, draggableId: result.draggableId, id});
         setRefresh(true)
-
     }
     if(showModal){
         return(
         <Modal scrollable={true} ariaHideApp={false} isOpen={showModal} onRequestClose={()=>setShowModal(false) }
         style={outerModal} >
           <div >
+          {changeAuthError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{changeAuthError}</b></ThemeTextTypography> : null}
                 {project.members.map((curr, i) => (
                     <div key={i}>
                         <ThemeTextTypography display="inline" style={{fontFamily: "serif"}} variant="h3">{curr.name}</ThemeTextTypography>
@@ -188,6 +286,7 @@ function Main(props){
                 <div class="search-item" style={{  maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
                 <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Pending</b></ThemeTextTypography>
                 <TextField label="Add Pending Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addPending}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
+                {pendingError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{pendingError}</b></ThemeTextTypography> : null}
                 <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
                 <Droppable key="Pending" droppableId="Pending">
                 {(provided, snapshot) => {
@@ -246,6 +345,7 @@ function Main(props){
                     <div class="search-item" style={{ maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
                 <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Active</b></ThemeTextTypography>
                 <TextField label="Add Active Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
+                {activeError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{activeError}</b></ThemeTextTypography> : null}
                 <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
                     <Droppable key="Active" droppableId="Active">
                 {(provided, snapshot) => {
@@ -306,6 +406,7 @@ function Main(props){
                     <div class="search-item" style={{  maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
                 <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Completed</b></ThemeTextTypography>
                 <TextField label="Add Completed Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
+                {completedError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{completedError}</b></ThemeTextTypography> : null}
                 <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
                     <Droppable key="Completed" droppableId="Completed">
                 {(provided, snapshot) => {
@@ -365,6 +466,7 @@ function Main(props){
 
                     <div style={{ maxHeight: "50vh", minHeight: "50vh", marginLeft: "7%", marginRight: "5%", backgroundColor: theme.innerBox}} class="search-item">
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Chat</b></ThemeTextTypography>
+                        {chatError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{chatError}</b></ThemeTextTypography> : null}
                         <div style={{overflowY: "auto", maxHeight: "80%", overflowX: "hidden"}}>
                             {chatData.length > 0 && chatData.map((row) => (
                                 <div style={{ textAlign: "left"}}>

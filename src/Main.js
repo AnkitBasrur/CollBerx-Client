@@ -79,7 +79,6 @@ function Main(props){
             setRefresh(false)
             socket.on("new data from server", (arg1) => {
                 setProject(arg1.data.data)
-                console.log("fetch")
                 arg1.data.data.members.map(member => {if(member.id === sessionStorage.getItem("email")) setAuthLevel(member.authLevel)} )
                 setPendingData(arg1.data.data.pending)
                 setActiveData(arg1.data.data.ongoing)
@@ -87,9 +86,6 @@ function Main(props){
                 setChatData(arg1.data.data.chat);
                 divRef && divRef.current && divRef.current.scrollIntoView && divRef.current.scrollIntoView({ behavior: 'smooth', block: 'end'});
             });
-            socket.on("Hey", (arg1) => {
-
-            })
         }
         if(refresh)
             fetchData()
@@ -102,10 +98,8 @@ function Main(props){
         setRefresh(true)
     }
     const addPending = async () => {
-        console.log(authLevel, "before")
         if(authLevel === "Level Z")
             return;
-        console.log(authLevel, "after")
         var dt = new Date();
         var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
         await axios.post('http://localhost:4000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("email") })

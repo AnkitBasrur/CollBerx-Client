@@ -115,7 +115,7 @@ function Main(props){
         setRefresh(true)
     }
     const addPending = async () => {
-        if(activeValue.length === 0) {
+        if(pendingValue.length === 0) {
             setPendingError("Invalid task entered");
             setTimeout(() => {
                 setPendingError("");
@@ -130,13 +130,13 @@ function Main(props){
             return;
         }
         var dt = new Date();
-        var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
+        var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setPendingValue('')
     }
     const addCompleted = async() => {
-        if(activeValue.length === 0) {
+        if(completedValue.length === 0) {
             setCompletedError("Invalid task entered");
             setTimeout(() => {
                 setCompletedError("");
@@ -151,7 +151,7 @@ function Main(props){
             return;
         }
         var dt = new Date();
-        var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
+        var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("email"), completedAt: date })
         setRefresh(true)
         setCompletedValue('')
@@ -172,7 +172,7 @@ function Main(props){
             return;
         }
         var dt = new Date();
-        var date = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
+        var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setActiveValue('')
@@ -227,7 +227,7 @@ function Main(props){
             return;
         }
         var dt = new Date();
-        var completedAt = dt.getDate() + " / " + (dt.getMonth() + 1) + " / " + dt.getFullYear();
+        var completedAt = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         await axios.post('https://rooms-server-side.herokuapp.com/nextLevel', { id, taskID, createdBy, name, createdAt,type, completedAt })
         setRefresh(true)
     }
@@ -310,24 +310,28 @@ function Main(props){
                                     {(provided, snapshot) => {
                                         return (
                                                 <div
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                                style={{
-                                                userSelect: "none",
-                                                padding: 16,
-                                                margin: "0 0 8px 0",
-                                                minHeight: "50px",
-                                                backgroundColor: snapshot.isDragging
-                                                    ? "#7d7c7c"
-                                                    : "#545353",
-                                                color: "white",
-                                                ...provided.draggableProps.style
-                                                }}
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    style={{
+                                                    userSelect: "none",
+                                                    padding: 16 ,
+                                                    margin: "0 0 0px 0",
+                                                    minHeight: "50px",
+                                                    backgroundColor: snapshot.isDragging
+                                                        ? "#7d7c7c"
+                                                        : "#545353",
+                                                    color: "white",
+                                                    ...provided.draggableProps.style
+                                                    }}
                                             >
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
-                                                <DoneIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
-                                                <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Pending")} />
+                                                <div style={{float: "right"}}>
+                                                    <DoneIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
+                                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Pending")} />
+                                                </div><br />
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
                                             </div>
                                         );
                                     }}
@@ -342,12 +346,12 @@ function Main(props){
                     </Droppable>
                     </div>
                     </div>
-                    <div class="search-item" style={{ maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
+                    <div class="search-item" style={{  maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
                 <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Active</b></ThemeTextTypography>
                 <TextField label="Add Active Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
                 {activeError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{activeError}</b></ThemeTextTypography> : null}
                 <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
-                    <Droppable key="Active" droppableId="Active">
+                <Droppable key="Active" droppableId="Active">
                 {(provided, snapshot) => {
                     return (
                         <div
@@ -356,11 +360,11 @@ function Main(props){
                         style={{
                           background: theme.innerBox,
                           padding: 4,
-                          width: "100%",
-                          overflowY: "none"
+                          width: "100%"
                         }}
                       >
                                 {activeData.map((row,i) => (
+                                    <div style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
                                     <Draggable
                                         key={row.taskID}
                                         draggableId={row.taskID}
@@ -369,35 +373,37 @@ function Main(props){
                                     {(provided, snapshot) => {
                                         return (
                                                 <div
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                                style={{
-                                                    overflowY: "auto",
-                                                userSelect: "none",
-                                                padding: 16,
-                                                margin: "0 0 8px 0",
-                                                minHeight: "50px",
-                                                backgroundColor: snapshot.isDragging
-                                                    ? "#7d7c7c"
-                                                    : "#545353",
-                                                color: "white",
-                                                ...provided.draggableProps.style
-                                                }}
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    style={{
+                                                    userSelect: "none",
+                                                    padding: 16 ,
+                                                    margin: "0 0 0px 0",
+                                                    minHeight: "50px",
+                                                    backgroundColor: snapshot.isDragging
+                                                        ? "#7d7c7c"
+                                                        : "#545353",
+                                                    color: "white",
+                                                    ...provided.draggableProps.style
+                                                    }}
                                             >
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
-                                                <DoneIcon style={{ cursor: "pointer", color: theme.text, marginLeft: "3%"}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
-                                                <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Active")} />
+                                                <div style={{float: "right"}}>
+                                                    <DoneIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
+                                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Active")} />
+                                                </div><br />
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
                                             </div>
                                         );
                                     }}
                                     </Draggable>
+                                    </div>
                                 ))}
                                 
                         {provided.placeholder}
-                      </div>
-                        
-                        
+                      </div>                        
                     );
                     }}
                     </Droppable>
@@ -408,7 +414,7 @@ function Main(props){
                 <TextField label="Add Completed Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
                 {completedError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{completedError}</b></ThemeTextTypography> : null}
                 <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
-                    <Droppable key="Completed" droppableId="Completed">
+                <Droppable key="Completed" droppableId="Completed">
                 {(provided, snapshot) => {
                     return (
                         <div
@@ -417,11 +423,11 @@ function Main(props){
                         style={{
                           background: theme.innerBox,
                           padding: 4,
-                          width: "100%",
-                          overflowY: "none"
+                          width: "100%"
                         }}
                       >
                                 {completedData.map((row,i) => (
+                                    <div style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
                                     <Draggable
                                         key={row.taskID}
                                         draggableId={row.taskID}
@@ -430,40 +436,42 @@ function Main(props){
                                     {(provided, snapshot) => {
                                         return (
                                                 <div
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                                style={{
-                                                    overflowY: "auto",
-                                                userSelect: "none",
-                                                padding: 16,
-                                                margin: "0 0 8px 0",
-                                                minHeight: "50px",
-                                                backgroundColor: snapshot.isDragging
-                                                    ? "#7d7c7c"
-                                                    : "#545353",
-                                                color: "white",
-                                                ...provided.draggableProps.style
-                                                }}
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    style={{
+                                                    userSelect: "none",
+                                                    padding: 16 ,
+                                                    margin: "0 0 0px 0",
+                                                    minHeight: "50px",
+                                                    backgroundColor: snapshot.isDragging
+                                                        ? "#7d7c7c"
+                                                        : "#545353",
+                                                    color: "white",
+                                                    ...provided.draggableProps.style
+                                                    }}
                                             >
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
-                                                <CancelIcon style={{ cursor: "pointer", marginLeft: "3%", color: theme.text}} onClick={() => removeData(row.taskID, "Completed")} />
+                                                <div style={{float: "right"}}>
+                                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Completed")} />
+                                                </div><br />
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
                                             </div>
                                         );
                                     }}
                                     </Draggable>
+                                    </div>
                                 ))}
                                 
                         {provided.placeholder}
-                      </div>
-                        
-                        
+                      </div>                        
                     );
                     }}
                     </Droppable>
                     </div>
                     </div>
-
+                    
                     <div style={{ maxHeight: "50vh", minHeight: "50vh", marginLeft: "7%", marginRight: "5%", backgroundColor: theme.innerBox}} class="search-item">
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Chat</b></ThemeTextTypography>
                         {chatError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{chatError}</b></ThemeTextTypography> : null}

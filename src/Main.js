@@ -14,6 +14,13 @@ import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
+var connectionOptions =  {
+    "force new connection" : true,
+    "reconnectionAttempts": "Infinity", 
+    "timeout" : 10000,                  
+    "transports" : ["websocket"]
+};
+
 const { uuid } = require('uuidv4');
 const styles = {
     light: {
@@ -25,7 +32,9 @@ const styles = {
         fontSize: "22px"
     }
 };
-const socket = io("https://rooms-server-side.herokuapp.com/");
+
+const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
+
 function Main(props){
     const divRef = useRef(null)
     let { id } = useParams();
@@ -301,7 +310,7 @@ function Main(props){
                         }}
                       >
                                 {pendingData.map((row,i) => (
-                                    <div style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
+                                    <div key={i} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
                                     <Draggable
                                         key={row.taskID}
                                         draggableId={row.taskID}
@@ -364,7 +373,7 @@ function Main(props){
                         }}
                       >
                                 {activeData.map((row,i) => (
-                                    <div style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
+                                    <div key={i} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
                                     <Draggable
                                         key={row.taskID}
                                         draggableId={row.taskID}
@@ -427,7 +436,7 @@ function Main(props){
                         }}
                       >
                                 {completedData.map((row,i) => (
-                                    <div style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
+                                    <div key={i} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
                                     <Draggable
                                         key={row.taskID}
                                         draggableId={row.taskID}
@@ -476,8 +485,8 @@ function Main(props){
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Chat</b></ThemeTextTypography>
                         {chatError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{chatError}</b></ThemeTextTypography> : null}
                         <div style={{overflowY: "auto", maxHeight: "80%", overflowX: "hidden"}}>
-                            {chatData.length > 0 && chatData.map((row) => (
-                                <div style={{ textAlign: "left"}}>
+                            {chatData.length > 0 && chatData.map((row,idx) => (
+                                <div key={idx} style={{ textAlign: "left"}}>
                                     <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h6" display="inline" ><b>{row.from} : </b></ThemeTextTypography>
                                     <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.text}</ThemeTextTypography>
                                 </div>

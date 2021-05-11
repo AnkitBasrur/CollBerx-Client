@@ -7,8 +7,13 @@ import { useContext } from "react";
 import {ThemeContext} from './contexts/ThemeContext'
 import { Button, Card, CardActionArea, CardContent, Grid, TextField, Typography } from "@material-ui/core";
 import NavBar from "./NavBar";
-import axios from "axios";
-import { useCookies } from "react-cookie";
+
+var connectionOptions =  {
+  "force new connection" : true,
+  "reconnectionAttempts": "Infinity", 
+  "timeout" : 10000,                  
+  "transports" : ["websocket"]
+};
 
 const styles = {
   light: {
@@ -21,7 +26,7 @@ const styles = {
   }
 };
 
-const socket = io("https://rooms-server-side.herokuapp.com/");
+const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
 function AddRoom(props) {
   const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;

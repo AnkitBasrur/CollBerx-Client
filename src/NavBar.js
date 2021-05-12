@@ -49,7 +49,10 @@ function NavBar(props){
               ....
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>
-            <ThemeTextTypography onClick={() => { sessionStorage.removeItem("email");history.push('/') }} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer",color: theme.text, marginLeft: "47%"}} >
+            <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", marginLeft: "35%"}} >
+              Hello, {sessionStorage.getItem("email")}
+            </ThemeTextTypography>
+            <ThemeTextTypography onClick={() => { sessionStorage.removeItem("email");history.push('/') }} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer",color: theme.text, marginLeft: "5%"}} >
               Logout
             </ThemeTextTypography>
           </Toolbar>

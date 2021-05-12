@@ -36,7 +36,6 @@ function Home() {
   useEffect(async () => {
     if(shouldFetch){
       const projects = await axios.get(`https://rooms-server-side.herokuapp.com/getProjects/${sessionStorage.getItem("email")}`)
-      console.log(projects)
       setProjects(projects.data.room)
       setShouldFetch(false)
     }

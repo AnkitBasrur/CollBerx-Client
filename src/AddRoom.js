@@ -26,7 +26,7 @@ const styles = {
   }
 };
 
-const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
+const socket = io("http://localhost:3000/", connectionOptions);
 function AddRoom(props) {
   const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;
@@ -59,7 +59,13 @@ function AddRoom(props) {
   useEffect(async () => {
     
     socket.on("Hey", (arg1) => {
-      if(arg1.msg === "Success"){
+      if(arg1.err){
+        setJoinRoomError(arg1.err);
+        setTimeout(() => {
+          setJoinRoomError("");
+        }, 5000)
+      }
+      else if(arg1.msg === "Success"){
           if(arg1.roomID){
             setCode(arg1.roomID)
             history.push({

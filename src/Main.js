@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { withStyles } from "@material-ui/core/styles";
-import { Button, TextField, Typography } from "@material-ui/core";
+import { MenuItem, Menu, Button, TextField, Typography } from "@material-ui/core";
 import { useContext } from "react";
 import {ThemeContext} from './contexts/ThemeContext'
 import { useParams } from "react-router-dom";
@@ -13,6 +13,9 @@ import Modal from 'react-modal'
 import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
+import { useHistory } from 'react-router-dom';
+import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 
 var connectionOptions =  {
     "force new connection" : true,
@@ -36,6 +39,7 @@ const styles = {
 const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
 
 function Main(props){
+    const history = useHistory()
     const divRef = useRef(null)
     let { id } = useParams();
     const { isLightTheme, light, dark } = useContext(ThemeContext);
@@ -78,6 +82,8 @@ function Main(props){
     const [completedError, setCompletedError] = useState('');
     const [changeAuthError, setChangeAuthError] = useState('');
     const [chatError, setChatError] = useState('');
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [clickedUser, setClickedUser] = useState({});
 
     const ThemeTextTypography = withStyles({
         root: {
@@ -93,12 +99,17 @@ function Main(props){
             setRefresh(false)
             socket.on("new data from server", (arg1) => {
                 setProject(arg1.data.data)
-                arg1.data.data.members.map(member => {if(member.id === sessionStorage.getItem("email")) setAuthLevel(member.authLevel)} )
-                setPendingData(arg1.data.data.pending)
-                setActiveData(arg1.data.data.ongoing)
-                setCompletedData(arg1.data.data.finsished)
-                setChatData(arg1.data.data.chat);
-                divRef && divRef.current && divRef.current.scrollIntoView && divRef.current.scrollIntoView({ behavior: 'smooth', block: 'end'});
+                const user = arg1.data.data.members.find((member) => member.id === sessionStorage.getItem("email"));
+                if(!user)
+                    history.push('/home')
+                else{
+                    setAuthLevel(user.authLevel)
+                    setPendingData(arg1.data.data.pending)
+                    setActiveData(arg1.data.data.ongoing)
+                    setCompletedData(arg1.data.data.finsished)
+                    setChatData(arg1.data.data.chat);
+                    divRef && divRef.current && divRef.current.scrollIntoView && divRef.current.scrollIntoView({ behavior: 'smooth', block: 'end'});
+                }
             });
         }
         if(refresh)
@@ -258,12 +269,39 @@ function Main(props){
         await axios.post('https://rooms-server-side.herokuapp.com/drag', {source, destination, draggableId: result.draggableId, id});
         setRefresh(true)
     }
+    const handleClick = (event, id, authLevel) => {
+        setClickedUser( {...clickedUser, id, authLevel});
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+    const blockUser = async(user) => {
+        if(user.id === sessionStorage.getItem("email")){
+            setChangeAuthError("Illegal option");
+            setTimeout(() => {
+                setChangeAuthError("");
+            }, 5000)
+            return;
+        }
+        if(authLevel != "Level X"){
+            setChangeAuthError("You dont have required permission");
+            setTimeout(() => {
+                setChangeAuthError("");
+            }, 5000)
+            return;
+        }
+        await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`)
+        setRefresh(true)
+    }
+
     if(showModal){
         return(
         <Modal scrollable={true} ariaHideApp={false} isOpen={showModal} onRequestClose={()=>setShowModal(false) }
         style={outerModal} >
           <div >
-          {changeAuthError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{changeAuthError}</b></ThemeTextTypography> : null}
+          {changeAuthError ? <ThemeTextTypography style={{color: "red"}} ><b>{changeAuthError}</b></ThemeTextTypography> : null}
                 {project.members.map((curr, i) => (
                     <div key={i}>
                         <ThemeTextTypography display="inline" style={{fontFamily: "serif"}} variant="h3">{curr.name}</ThemeTextTypography>
@@ -271,7 +309,23 @@ function Main(props){
                             <Button onClick={() => changeAuthLevel(curr.id, "Level X")}>{curr.authLevel === "Level X" ? <ThemeTextTypography variant="h6" style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level X</ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "fantasy"}} variant="h6">Level X</ThemeTextTypography> }</Button>
                             <Button onClick={() => changeAuthLevel(curr.id, "Level Y")}>{curr.authLevel === "Level Y" ? <ThemeTextTypography variant="h6" style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Y</ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "fantasy"}} variant="h6">Level Y</ThemeTextTypography> }</Button>
                             <Button onClick={() => changeAuthLevel(curr.id, "Level Z")}>{curr.authLevel === "Level Z" ? <ThemeTextTypography variant="h6" style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Z</ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "fantasy"}} variant="h6">Level Z</ThemeTextTypography> }</Button>
+                            <Button aria-controls="simple-menu" aria-haspopup="true" onClick={(e) => handleClick(e, curr.id, curr.authLevel)}>
+                                <DragIndicatorIcon style={{color: theme.text}} />
+                            </Button>
+                            <Menu
+                                id="simple-menu"
+                                anchorEl={anchorEl}
+                                keepMounted
+                                open={Boolean(anchorEl)}
+                                onClose={handleClose}
+                            >
+                                <MenuItem onClick={handleClose}><Button onClick={() => changeAuthLevel(clickedUser.id, "Level X")}>{clickedUser.authLevel === "Level X" ? <Typography style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level X</Typography> : <Typography style={{fontFamily: "fantasy"}} >Level X</Typography> }</Button></MenuItem>
+                                <MenuItem onClick={handleClose}><Button onClick={() => changeAuthLevel(clickedUser.id, "Level Y")}>{clickedUser.authLevel === "Level Y" ? <Typography style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Y</Typography> : <Typography style={{fontFamily: "fantasy"}} >Level Y</Typography> }</Button></MenuItem>
+                                <MenuItem onClick={handleClose}><Button onClick={() => changeAuthLevel(clickedUser.id, "Level Z")}>{clickedUser.authLevel === "Level Z" ? <Typography  style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Z</Typography> : <Typography style={{fontFamily: "fantasy"}} >Level Z</Typography> }</Button></MenuItem>
+                                <MenuItem onClick={handleClose}><Button onClick={() => blockUser(clickedUser)}><Typography style={{ fontFamily: "fantasy"}}>Remove & Block</Typography></Button></MenuItem>
+                            </Menu>
                         </div>
+                        
                     </div>
                 ))}
           </div>
@@ -288,6 +342,7 @@ function Main(props){
                     <ThemeTextTypography display="inline" style={{fontWeight: "bold", fontFamily:"serif"}} variant="h3">{project.name}</ThemeTextTypography>
                     <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id)}} variant="h4">🔗</ThemeTextTypography>
                     {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
+                    <LibraryBooksIcon style={{cursor: "pointer", color: theme.text, marginLeft: "5%"}} fontSize="large" />
                 </div>
                 <DragDropContext onDragEnd={result => onDragEnd(result)}>
 
@@ -295,7 +350,7 @@ function Main(props){
                 <div class="search-item" style={{  maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
                 <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Pending</b></ThemeTextTypography>
                 <TextField label="Add Pending Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addPending}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={pendingValue} onChange={(e) => setPendingValue(e.target.value)} />
-                {pendingError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{pendingError}</b></ThemeTextTypography> : null}
+                {pendingError ? <ThemeTextTypography style={{color: "red"}} ><b>{pendingError}</b></ThemeTextTypography> : null}
                 <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
                 <Droppable key="Pending" droppableId="Pending">
                 {(provided, snapshot) => {
@@ -358,7 +413,7 @@ function Main(props){
                     <div class="search-item" style={{  maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
                 <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Active</b></ThemeTextTypography>
                 <TextField label="Add Active Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addActive}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={activeValue} onChange={(e) => setActiveValue(e.target.value)} />
-                {activeError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{activeError}</b></ThemeTextTypography> : null}
+                {activeError ? <ThemeTextTypography style={{color: "red"}} ><b>{activeError}</b></ThemeTextTypography> : null}
                 <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
                 <Droppable key="Active" droppableId="Active">
                 {(provided, snapshot) => {
@@ -421,7 +476,7 @@ function Main(props){
                     <div class="search-item" style={{  maxHeight: "70vh", minHeight: "70vh", backgroundColor: theme.innerBox}}>
                 <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Completed</b></ThemeTextTypography>
                 <TextField label="Add Completed Task" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addCompleted}>Add</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ backgroundColor: theme.input }} type="text" value={completedValue} onChange={(e) => setCompletedValue(e.target.value)} />
-                {completedError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{completedError}</b></ThemeTextTypography> : null}
+                {completedError ? <ThemeTextTypography style={{color: "red"}}><b>{completedError}</b></ThemeTextTypography> : null}
                 <div style={{marginTop:"3%", overflowY: "auto", maxHeight: "85%", overflowX: "hidden"}}>
                 <Droppable key="Completed" droppableId="Completed">
                 {(provided, snapshot) => {
@@ -483,7 +538,7 @@ function Main(props){
                     
                     <div style={{ maxHeight: "50vh", minHeight: "50vh", marginLeft: "7%", marginRight: "5%", backgroundColor: theme.innerBox}} class="search-item">
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Chat</b></ThemeTextTypography>
-                        {chatError ? <ThemeTextTypography style={{color: "red"}} variant="h7"><b>{chatError}</b></ThemeTextTypography> : null}
+                        {chatError ? <ThemeTextTypography style={{color: "red"}}><b>{chatError}</b></ThemeTextTypography> : null}
                         <div style={{overflowY: "auto", maxHeight: "80%", overflowX: "hidden"}}>
                             {chatData.length > 0 && chatData.map((row,idx) => (
                                 <div key={idx} style={{ textAlign: "left"}}>

@@ -16,6 +16,8 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import { useHistory } from 'react-router-dom';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
+import Snackbar from '@material-ui/core/Snackbar';
+import React from 'react'
 
 var connectionOptions =  {
     "force new connection" : true,
@@ -33,6 +35,12 @@ const styles = {
     dark: {
         color: "white",
         fontSize: "22px"
+    }, 
+    snackbar: {
+        backgroundColor:"teal", 
+        color:"white",
+        textAlign: "center",
+        minHeight: "70%"
     }
 };
 
@@ -76,6 +84,7 @@ function Main(props){
     const [chatValue, setChatValue] = useState('')
     const [authLevel, setAuthLevel] = useState('')
     const [showModal, setShowModal] = useState(false)
+    const [showSnackbar, setShowSnackbar] = useState(false)
     const [project, setProject] = useState("");
     const [pendingError, setPendingError] = useState('');
     const [activeError, setActiveError] = useState('');
@@ -295,7 +304,7 @@ function Main(props){
         await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`)
         setRefresh(true)
     }
-
+    const handleCloseSnackbar = () => { setShowSnackbar(false) }
     if(showModal){
         return(
         <Modal scrollable={true} ariaHideApp={false} isOpen={showModal} onRequestClose={()=>setShowModal(false) }
@@ -306,11 +315,9 @@ function Main(props){
                     <div key={i}>
                         <ThemeTextTypography display="inline" style={{fontFamily: "serif"}} variant="h3">{curr.name}</ThemeTextTypography>
                         <div style={{display: 'inline', float: "right"}}>
-                            <Button onClick={() => changeAuthLevel(curr.id, "Level X")}>{curr.authLevel === "Level X" ? <ThemeTextTypography variant="h6" style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level X</ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "fantasy"}} variant="h6">Level X</ThemeTextTypography> }</Button>
-                            <Button onClick={() => changeAuthLevel(curr.id, "Level Y")}>{curr.authLevel === "Level Y" ? <ThemeTextTypography variant="h6" style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Y</ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "fantasy"}} variant="h6">Level Y</ThemeTextTypography> }</Button>
-                            <Button onClick={() => changeAuthLevel(curr.id, "Level Z")}>{curr.authLevel === "Level Z" ? <ThemeTextTypography variant="h6" style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Z</ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "fantasy"}} variant="h6">Level Z</ThemeTextTypography> }</Button>
+                            <ThemeTextTypography variant="h5" style={{color: "#ed1c00", fontFamily: "fantasy", verticalAlign: "text-top"}} display="inline">{curr.authLevel}</ThemeTextTypography>
                             <Button aria-controls="simple-menu" aria-haspopup="true" onClick={(e) => handleClick(e, curr.id, curr.authLevel)}>
-                                <DragIndicatorIcon style={{color: theme.text}} />
+                                <DragIndicatorIcon fontSize="large" style={{color: theme.text}} />
                             </Button>
                             <Menu
                                 id="simple-menu"
@@ -337,10 +344,25 @@ function Main(props){
         return (
             <>
             <NavBar />
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                ContentProps={{
+                    classes: {
+                      root: classes.snackbar
+                    }
+                }}
+                open={showSnackbar}
+                autoHideDuration={5000}
+                onClose={handleCloseSnackbar}
+                message={ <Typography>Room ID copied to clipboard !</Typography> }
+            />
             <div style={{ minHeight: "93.5vh", backgroundColor: theme.ui}}>
                 <div style={{textAlign: "center"}}>
                     <ThemeTextTypography display="inline" style={{fontWeight: "bold", fontFamily:"serif"}} variant="h3">{project.name}</ThemeTextTypography>
-                    <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id)}} variant="h4">🔗</ThemeTextTypography>
+                    <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id); setShowSnackbar(true)}} variant="h4">🔗</ThemeTextTypography>
                     {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
                     <LibraryBooksIcon style={{cursor: "pointer", color: theme.text, marginLeft: "5%"}} fontSize="large" />
                 </div>
@@ -552,7 +574,9 @@ function Main(props){
                     </div>
                 </div>
                 </DragDropContext>
+                
             </div>
+            
             </>
         )
     }

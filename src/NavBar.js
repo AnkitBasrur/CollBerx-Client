@@ -36,20 +36,20 @@ function NavBar(props){
       <div>
         <AppBar style={{ backgroundColor:  theme.navbar }} position="static">
           <Toolbar variant="dense" >
-            <ThemeTextTypography  onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}}>
+            <ThemeTextTypography  onClick={() => history.push('/home')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "7%"}}>
+              CollBerx
+            </ThemeTextTypography>
+            <ThemeTextTypography  onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "23%"}}>
               Home
             </ThemeTextTypography>
             <ThemeTextTypography onClick={() => history.push('/addRoom')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}} >
               Add Room
             </ThemeTextTypography>
             <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
-              ....
-            </ThemeTextTypography>
-            <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}} >
-              ....
+              About Us
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>
-            <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", marginLeft: "35%"}} >
+            <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", marginLeft: "15%"}} >
               Hello, {sessionStorage.getItem("email")}
             </ThemeTextTypography>
             <ThemeTextTypography onClick={() => { sessionStorage.removeItem("email");history.push('/') }} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer",color: theme.text, marginLeft: "5%"}} >

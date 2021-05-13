@@ -140,7 +140,9 @@ function Main(props){
             }, 5000)
             return;
         }
-        await axios.post('https://rooms-server-side.herokuapp.com/changeAuth', {id, user, level});
+        var dt = new Date();
+        var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        await axios.post('http://localhost:3000/changeAuth', {id, user, level, date, from: sessionStorage.getItem("email")});
         setRefresh(true)
     }
     const addPending = async () => {
@@ -160,7 +162,7 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
+        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setPendingValue('')
     }
@@ -181,7 +183,7 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("email"), completedAt: date })
+        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("email"), completedAt: date })
         setRefresh(true)
         setCompletedValue('')
     }
@@ -202,11 +204,11 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
+        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setActiveValue('')
     }
-    const removeData = async(taskID, type) => {
+    const removeData = async(taskID, type, name) => {
         if(authLevel === "Level Z"){
             if(type === "Pending"){
                 setPendingError("You dont have required permission");
@@ -229,7 +231,9 @@ function Main(props){
             return;
         }
         if(taskID !== undefined && type !== undefined){
-            await axios.post('https://rooms-server-side.herokuapp.com/removeData', { id, taskID, type })
+            var dt = new Date();
+            var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+            await axios.post('http://localhost:3000/removeData', { id, taskID, type, name, date, userID: sessionStorage.getItem("email")})
             setRefresh(true)
         }
     }
@@ -257,7 +261,7 @@ function Main(props){
         }
         var dt = new Date();
         var completedAt = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        await axios.post('https://rooms-server-side.herokuapp.com/nextLevel', { id, taskID, createdBy, name, createdAt,type, completedAt })
+        await axios.post('http://localhost:3000/nextLevel', { id, taskID, createdBy, name, createdAt,type, completedAt })
         setRefresh(true)
     }
     const addChat = async() => {
@@ -275,7 +279,9 @@ function Main(props){
     const onDragEnd = async(result) => {
         if(!result.destination) return;
         const { source, destination, droppableId } = result;
-        await axios.post('https://rooms-server-side.herokuapp.com/drag', {source, destination, draggableId: result.draggableId, id});
+        var dt = new Date();
+        var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        await axios.post('http://localhost:3000/drag', {source, destination, draggableId: result.draggableId, id, date, from: sessionStorage.getItem("email")});
         setRefresh(true)
     }
     const handleClick = (event, id, authLevel) => {
@@ -301,7 +307,9 @@ function Main(props){
             }, 5000)
             return;
         }
-        await axios.post(`https://rooms-server-side.herokuapp.com/blockUser/${user.id}/${id}`)
+        var dt = new Date();
+        var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("email")})
         setRefresh(true)
     }
     const handleCloseSnackbar = () => { setShowSnackbar(false) }
@@ -414,7 +422,7 @@ function Main(props){
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                                                 <div style={{float: "right"}}>
                                                     <DoneIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
-                                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Pending")} />
+                                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Pending", row.name)} />
                                                 </div><br />
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
@@ -477,7 +485,7 @@ function Main(props){
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                                                 <div style={{float: "right"}}>
                                                     <DoneIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
-                                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Active")} />
+                                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Active",row.name)} />
                                                 </div><br />
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
@@ -539,7 +547,7 @@ function Main(props){
                                             >
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                                                 <div style={{float: "right"}}>
-                                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Completed")} />
+                                                    <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Completed",row.name)} />
                                                 </div><br />
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
                                                 <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>

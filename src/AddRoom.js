@@ -26,7 +26,7 @@ const styles = {
   }
 };
 
-const socket = io("http://localhost:3000/", connectionOptions);
+const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
 function AddRoom(props) {
   const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;

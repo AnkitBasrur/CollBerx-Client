@@ -301,7 +301,7 @@ function Main(props){
             }, 5000)
             return;
         }
-        await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`)
+        await axios.post(`https://rooms-server-side.herokuapp.com/blockUser/${user.id}/${id}`)
         setRefresh(true)
     }
     const handleCloseSnackbar = () => { setShowSnackbar(false) }

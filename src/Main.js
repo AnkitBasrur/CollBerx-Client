@@ -85,6 +85,7 @@ function Main(props){
     const [authLevel, setAuthLevel] = useState('')
     const [showModal, setShowModal] = useState(false)
     const [showSnackbar, setShowSnackbar] = useState(false)
+    const [isNewUser, setIsNewUser] = useState(true) 
     const [project, setProject] = useState("");
     const [pendingError, setPendingError] = useState('');
     const [activeError, setActiveError] = useState('');
@@ -107,12 +108,16 @@ function Main(props){
         const fetchData = async() => {
             const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("email")}`)
             setAuthLevel(res.data.authLevel)
-            socket.emit("new data", { data: res.data.data, from: broadcastMessage.from, message: broadcastMessage.message })
+            if(props.location.state.newUser && isNewUser){
+                socket.emit("new data", { data: res.data.data, message: `Welcome to the team ${sessionStorage.getItem("email")}` })
+                setIsNewUser(false)
+            }
+            else
+                socket.emit("new data", { data: res.data.data, from: broadcastMessage.from, message: broadcastMessage.message })
             setBroadcastMessage({});
             setRefresh(false)
             socket.on("new data from server", (arg1) => {
                 if(arg1.data.message){
-                    console.log("we have to show")
                     setSnackBarMessage({...snackBarMessage ,from: arg1.data.from, message: arg1.data.message })
                     setShowSnackbar(true)
                 }
@@ -329,7 +334,28 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Blocked user ${user.id}`});
-        // await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("email")})
+        await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("email")})
+        setRefresh(true)
+    }
+    const removeUser = async(user) => {
+        if(user.id === sessionStorage.getItem("email")){
+            setChangeAuthError("Illegal option");
+            setTimeout(() => {
+                setChangeAuthError("");
+            }, 5000)
+            return;
+        }
+        if(authLevel != "Level X"){
+            setChangeAuthError("You dont have required permission");
+            setTimeout(() => {
+                setChangeAuthError("");
+            }, 5000)
+            return;
+        }
+        var dt = new Date();
+        var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Removed user ${user.id}`});
+        await axios.post(`http://localhost:3000/removeUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("email")})
         setRefresh(true)
     }
     const handleCloseSnackbar = () => { 
@@ -361,6 +387,7 @@ function Main(props){
                                 <MenuItem onClick={handleClose}><Button onClick={() => changeAuthLevel(clickedUser.id, "Level Y")}>{clickedUser.authLevel === "Level Y" ? <Typography style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Y</Typography> : <Typography style={{fontFamily: "fantasy"}} >Level Y</Typography> }</Button></MenuItem>
                                 <MenuItem onClick={handleClose}><Button onClick={() => changeAuthLevel(clickedUser.id, "Level Z")}>{clickedUser.authLevel === "Level Z" ? <Typography  style={{color: "#ed1c00", fontFamily: "fantasy"}}>Level Z</Typography> : <Typography style={{fontFamily: "fantasy"}} >Level Z</Typography> }</Button></MenuItem>
                                 <MenuItem onClick={handleClose}><Button onClick={() => blockUser(clickedUser)}><Typography style={{ fontFamily: "fantasy"}}>Remove & Block</Typography></Button></MenuItem>
+                                <MenuItem onClick={handleClose}><Button onClick={() => removeUser(clickedUser)}><Typography style={{ fontFamily: "fantasy"}}>Remove</Typography></Button></MenuItem>
                             </Menu>
                         </div>
                         

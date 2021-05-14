@@ -70,7 +70,7 @@ function AddRoom(props) {
             setCode(arg1.roomID)
             history.push({
               pathname: `/main/${arg1.roomID}`,
-              state: { roomID: arg1.roomID}
+              state: { roomID: arg1.roomID, newUser: true}
             }); 
         }
       }

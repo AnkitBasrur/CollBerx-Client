@@ -1,14 +1,13 @@
-import React, { useContext } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useContext, useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
 import {ThemeContext} from './contexts/ThemeContext'
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import { useHistory } from 'react-router-dom';
 import { withStyles } from "@material-ui/core/styles";
+import { Button, Menu, MenuItem } from '@material-ui/core';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
 const styles = {
   light: {
@@ -18,6 +17,10 @@ const styles = {
   dark: {
       color: "white",
       fontSize: "22px"
+  }, 
+  menuPaper: {
+    backgroundColor:"grey",
+    marginTop: "1.5%"
   }
 };
 
@@ -25,12 +28,23 @@ function NavBar(props){
     const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
     const theme = isLightTheme ? light : dark;
     const history = useHistory()
+    const { classes } = props;
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const ThemeTextTypography = withStyles({
       root: {
         color: theme.text
       }
     })(Typography);
+
+
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
 
     return (
       <div>
@@ -49,12 +63,22 @@ function NavBar(props){
               About Us
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>
-            <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", marginLeft: "15%"}} >
-              Hello, {sessionStorage.getItem("email")}
-            </ThemeTextTypography>
-            <ThemeTextTypography onClick={() => { sessionStorage.removeItem("email");history.push('/') }} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer",color: theme.text, marginLeft: "5%"}} >
-              Logout
-            </ThemeTextTypography>
+            <Button aria-controls="simple-menu" aria-haspopup="true" style={{ marginLeft: "20%", fontFamily: "Arial" }} onClick={handleClick}>
+              <ThemeTextTypography variant="h6" style={{textTransform:"none", color: "tomato"}}>Hello, {sessionStorage.getItem("email")} <ArrowDropDownIcon style={{verticalAlign: "text-top"}} /></ThemeTextTypography>
+            </Button>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              classes={{ paper: classes.menuPaper }}
+            >
+              <MenuItem onClick={handleClose}><ThemeTextTypography>Profile</ThemeTextTypography></MenuItem>
+              <MenuItem onClick={handleClose}><ThemeTextTypography>My account</ThemeTextTypography></MenuItem>
+              <MenuItem onClick={() => { sessionStorage.removeItem("email");history.push('/') }}><ThemeTextTypography>Logout</ThemeTextTypography></MenuItem>
+            </Menu>
+
           </Toolbar>
         </AppBar>
       </div>

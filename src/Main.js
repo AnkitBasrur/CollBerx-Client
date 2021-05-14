@@ -44,7 +44,7 @@ const styles = {
     }
 };
 
-const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
+const socket = io("http://localhost:3000/", connectionOptions);
 
 function Main(props){
     const history = useHistory()
@@ -92,7 +92,10 @@ function Main(props){
     const [changeAuthError, setChangeAuthError] = useState('');
     const [chatError, setChatError] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
+    const [dragName, setDragName] = useState('');
     const [clickedUser, setClickedUser] = useState({});
+    const [broadcastMessage, setBroadcastMessage] = useState({});
+    const [snackBarMessage, setSnackBarMessage] = useState({});
 
     const ThemeTextTypography = withStyles({
         root: {
@@ -104,9 +107,15 @@ function Main(props){
         const fetchData = async() => {
             const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("email")}`)
             setAuthLevel(res.data.authLevel)
-            socket.emit("new data", { data: res.data.data })
+            socket.emit("new data", { data: res.data.data, from: broadcastMessage.from, message: broadcastMessage.message })
+            setBroadcastMessage({});
             setRefresh(false)
             socket.on("new data from server", (arg1) => {
+                if(arg1.data.message){
+                    console.log("we have to show")
+                    setSnackBarMessage({...snackBarMessage ,from: arg1.data.from, message: arg1.data.message })
+                    setShowSnackbar(true)
+                }
                 setProject(arg1.data.data)
                 const user = arg1.data.data.members.find((member) => member.id === sessionStorage.getItem("email"));
                 if(!user)
@@ -142,6 +151,7 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Changed Auth Level of ${user} to ${level}`});
         await axios.post('http://localhost:3000/changeAuth', {id, user, level, date, from: sessionStorage.getItem("email")});
         setRefresh(true)
     }
@@ -162,6 +172,7 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Added ${pendingValue} into Pending Task`});
         await axios.post('http://localhost:3000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setPendingValue('')
@@ -183,6 +194,7 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Added ${completedValue} into Completed Task`});
         await axios.post('http://localhost:3000/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("email"), completedAt: date })
         setRefresh(true)
         setCompletedValue('')
@@ -204,6 +216,7 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Added ${activeValue} into Active Task`});
         await axios.post('http://localhost:3000/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
         setRefresh(true)
         setActiveValue('')
@@ -233,6 +246,7 @@ function Main(props){
         if(taskID !== undefined && type !== undefined){
             var dt = new Date();
             var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Removed ${name} from ${type} Task`});
             await axios.post('http://localhost:3000/removeData', { id, taskID, type, name, date, userID: sessionStorage.getItem("email")})
             setRefresh(true)
         }
@@ -261,7 +275,11 @@ function Main(props){
         }
         var dt = new Date();
         var completedAt = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        await axios.post('http://localhost:3000/nextLevel', { id, taskID, createdBy, name, createdAt,type, completedAt })
+        if(type === "Active")
+            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Moved ${name} from Active to Completed Task`});
+        else if(type === "Pending")
+            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Moved ${name} from Pending to Active Task`});
+        await axios.post('http://localhost:3000/nextLevel', { id, taskID, createdBy, name, createdAt, type, completedAt })
         setRefresh(true)
     }
     const addChat = async() => {
@@ -281,6 +299,7 @@ function Main(props){
         const { source, destination, droppableId } = result;
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Moved ${dragName} from ${source.droppableId} to ${destination.droppableId} Task`});
         await axios.post('http://localhost:3000/drag', {source, destination, draggableId: result.draggableId, id, date, from: sessionStorage.getItem("email")});
         setRefresh(true)
     }
@@ -309,10 +328,14 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("email")})
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Blocked user ${user.id}`});
+        // await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("email")})
         setRefresh(true)
     }
-    const handleCloseSnackbar = () => { setShowSnackbar(false) }
+    const handleCloseSnackbar = () => { 
+        setShowSnackbar(false) 
+        setSnackBarMessage({});
+    }
     if(showModal){
         return(
         <Modal scrollable={true} ariaHideApp={false} isOpen={showModal} onRequestClose={()=>setShowModal(false) }
@@ -365,12 +388,12 @@ function Main(props){
                 open={showSnackbar}
                 autoHideDuration={5000}
                 onClose={handleCloseSnackbar}
-                message={ <Typography>Room ID copied to clipboard !</Typography> }
+                message={ <Typography>{snackBarMessage.from ? <div><b>{snackBarMessage.from} :</b> {snackBarMessage.message}</div> : snackBarMessage.message ? snackBarMessage.message : null}</Typography> }
             />
             <div style={{ minHeight: "93.5vh", backgroundColor: theme.ui}}>
                 <div style={{textAlign: "center"}}>
                     <ThemeTextTypography display="inline" style={{fontWeight: "bold", fontFamily:"serif"}} variant="h3">{project.name}</ThemeTextTypography>
-                    <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id); setShowSnackbar(true)}} variant="h4">🔗</ThemeTextTypography>
+                    <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id); setShowSnackbar(true); setSnackBarMessage({message:"Room ID copied to clipboard !"})}} variant="h4">🔗</ThemeTextTypography>
                     {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
                     <LibraryBooksIcon style={{cursor: "pointer", color: theme.text, marginLeft: "5%"}} fontSize="large" />
                 </div>
@@ -395,7 +418,7 @@ function Main(props){
                         }}
                       >
                                 {pendingData.map((row,i) => (
-                                    <div key={i} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
+                                    <div key={i} onClick={setDragName(row.name)} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
                                     <Draggable
                                         key={row.taskID}
                                         draggableId={row.taskID}
@@ -458,7 +481,7 @@ function Main(props){
                         }}
                       >
                                 {activeData.map((row,i) => (
-                                    <div key={i} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
+                                    <div key={i} onClick={setDragName(row.name)} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
                                     <Draggable
                                         key={row.taskID}
                                         draggableId={row.taskID}
@@ -521,7 +544,7 @@ function Main(props){
                         }}
                       >
                                 {completedData.map((row,i) => (
-                                    <div key={i} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
+                                    <div onClick={setDragName(row.name)} key={i} style={{ backgroundColor: theme.innerBox, marginBottom: "10px"}} >
                                     <Draggable
                                         key={row.taskID}
                                         draggableId={row.taskID}

@@ -53,7 +53,10 @@ function NavBar(props){
             <ThemeTextTypography  onClick={() => history.push('/home')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "7%"}}>
               CollBerx
             </ThemeTextTypography>
-            <ThemeTextTypography  onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "23%"}}>
+            <ThemeTextTypography display="inline" onClick={() => history.push('/home')} variant="h6" style={{ color: "grey", fontFamily: "Arial", cursor: "pointer", marginLeft:"5px"}}>
+                v1.1
+            </ThemeTextTypography>
+            <ThemeTextTypography  onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "20%"}}>
               Home
             </ThemeTextTypography>
             <ThemeTextTypography onClick={() => history.push('/addRoom')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}} >
@@ -63,8 +66,8 @@ function NavBar(props){
               About Us
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>
-            <Button aria-controls="simple-menu" aria-haspopup="true" style={{ marginLeft: "20%", fontFamily: "Arial" }} onClick={handleClick}>
-              <ThemeTextTypography variant="h6" style={{textTransform:"none", color: "tomato"}}>Hello, {sessionStorage.getItem("email")} <ArrowDropDownIcon style={{verticalAlign: "text-top"}} /></ThemeTextTypography>
+            <Button aria-controls="simple-menu" aria-haspopup="true" style={{ marginLeft: "7%", fontFamily: "Arial" }} onClick={handleClick}>
+              <ThemeTextTypography variant="h6" style={{textTransform:"none", color: "tomato"}}>Hello, {sessionStorage.getItem("name")} <ArrowDropDownIcon style={{verticalAlign: "text-top"}} /></ThemeTextTypography>
             </Button>
             <Menu
               id="simple-menu"

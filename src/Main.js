@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { withStyles } from "@material-ui/core/styles";
-import { MenuItem, Menu, Button, TextField, Typography } from "@material-ui/core";
+import { MenuItem, Menu, Button, TextField, Typography, Select, InputLabel } from "@material-ui/core";
 import { useContext } from "react";
 import {ThemeContext} from './contexts/ThemeContext'
 import { useParams } from "react-router-dom";
@@ -18,6 +18,7 @@ import { useHistory } from 'react-router-dom';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import Snackbar from '@material-ui/core/Snackbar';
 import React from 'react'
+import SendIcon from '@material-ui/icons/Send';
 
 var connectionOptions =  {
     "force new connection" : true,
@@ -40,7 +41,14 @@ const styles = {
         backgroundColor:"teal", 
         color:"white",
         textAlign: "center",
-        minHeight: "70%"
+        minHeight: "70%", 
+    }, 
+    select: {
+        fontSize: "20px", 
+        color:"white",
+    }, 
+    icon: {
+        fill:"white",
     }
 };
 
@@ -86,6 +94,7 @@ function Main(props){
     const [showModal, setShowModal] = useState(false)
     const [showSnackbar, setShowSnackbar] = useState(false)
     const [isNewUser, setIsNewUser] = useState(true) 
+    const [isChatBarOpen, setIsChatBarOpen] = useState(false) 
     const [project, setProject] = useState("");
     const [pendingError, setPendingError] = useState('');
     const [activeError, setActiveError] = useState('');
@@ -93,6 +102,7 @@ function Main(props){
     const [changeAuthError, setChangeAuthError] = useState('');
     const [chatError, setChatError] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
+    const [priority, setPriority] = useState('Low');
     const [dragName, setDragName] = useState('');
     const [clickedUser, setClickedUser] = useState({});
     const [broadcastMessage, setBroadcastMessage] = useState({});
@@ -109,7 +119,7 @@ function Main(props){
             const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("email")}`)
             setAuthLevel(res.data.authLevel)
             if(props.location.state.newUser && isNewUser){
-                socket.emit("new data", { data: res.data.data, message: `Welcome to the team ${sessionStorage.getItem("email")}` })
+                socket.emit("new data", { data: res.data.data, message: `Welcome to the team ${sessionStorage.getItem("name")}` })
                 setIsNewUser(false)
             }
             else
@@ -156,8 +166,8 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Changed Auth Level of ${user} to ${level}`});
-        await axios.post('http://localhost:3000/changeAuth', {id, user, level, date, from: sessionStorage.getItem("email")});
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Changed Auth Level of ${user} to ${level}`});
+        await axios.post('http://localhost:3000/changeAuth', {id, user, level, date, from: sessionStorage.getItem("name")});
         setRefresh(true)
     }
     const addPending = async () => {
@@ -177,8 +187,8 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Added ${pendingValue} into Pending Task`});
-        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Added ${pendingValue} into Pending Task`});
+        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
         setRefresh(true)
         setPendingValue('')
     }
@@ -199,8 +209,8 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Added ${completedValue} into Completed Task`});
-        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("email"), completedAt: date })
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Added ${completedValue} into Completed Task`});
+        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("name"), completedAt: date })
         setRefresh(true)
         setCompletedValue('')
     }
@@ -221,8 +231,8 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Added ${activeValue} into Active Task`});
-        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("email") })
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Added ${activeValue} into Active Task`});
+        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
         setRefresh(true)
         setActiveValue('')
     }
@@ -251,8 +261,8 @@ function Main(props){
         if(taskID !== undefined && type !== undefined){
             var dt = new Date();
             var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Removed ${name} from ${type} Task`});
-            await axios.post('http://localhost:3000/removeData', { id, taskID, type, name, date, userID: sessionStorage.getItem("email")})
+            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Removed ${name} from ${type} Task`});
+            await axios.post('http://localhost:3000/removeData', { id, taskID, type, name, date, userID: sessionStorage.getItem("name")})
             setRefresh(true)
         }
     }
@@ -281,9 +291,9 @@ function Main(props){
         var dt = new Date();
         var completedAt = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         if(type === "Active")
-            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Moved ${name} from Active to Completed Task`});
+            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${name} from Active to Completed Task`});
         else if(type === "Pending")
-            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Moved ${name} from Pending to Active Task`});
+            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${name} from Pending to Active Task`});
         await axios.post('http://localhost:3000/nextLevel', { id, taskID, createdBy, name, createdAt, type, completedAt })
         setRefresh(true)
     }
@@ -295,8 +305,12 @@ function Main(props){
             }, 5000)
             return;
         }
-        await axios.post('https://rooms-server-side.herokuapp.com/addChat', { id, text: chatValue, from: sessionStorage.getItem("email"), chatID: uuid() })
+        if(priority === "High") 
+            setBroadcastMessage( {...broadcastMessage, from: '', message: `Received High Priority Message from ${sessionStorage.getItem("name")}: ${chatValue}`});
+
+        await axios.post('http://localhost:3000/addChat', { id, text: chatValue, fromName: sessionStorage.getItem("name"), fromEmail: sessionStorage.getItem("email"), chatID: uuid(), priority })
         setChatValue('')
+        setPriority("Low")
         setRefresh(true)
     }
     const onDragEnd = async(result) => {
@@ -304,8 +318,8 @@ function Main(props){
         const { source, destination, droppableId } = result;
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Moved ${dragName} from ${source.droppableId} to ${destination.droppableId} Task`});
-        await axios.post('http://localhost:3000/drag', {source, destination, draggableId: result.draggableId, id, date, from: sessionStorage.getItem("email")});
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${dragName} from ${source.droppableId} to ${destination.droppableId} Task`});
+        await axios.post('http://localhost:3000/drag', {source, destination, draggableId: result.draggableId, id, date, from: sessionStorage.getItem("name")});
         setRefresh(true)
     }
     const handleClick = (event, id, authLevel) => {
@@ -333,8 +347,8 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Blocked user ${user.id}`});
-        await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("email")})
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Blocked user ${user.id}`});
+        await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
     const removeUser = async(user) => {
@@ -354,14 +368,19 @@ function Main(props){
         }
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
-        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("email"), message: `Removed user ${user.id}`});
-        await axios.post(`http://localhost:3000/removeUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("email")})
+        setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Removed user ${user.id}`});
+        await axios.post(`http://localhost:3000/removeUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
     const handleCloseSnackbar = () => { 
         setShowSnackbar(false) 
         setSnackBarMessage({});
     }
+    const handleChatBarClose = () => { setIsChatBarOpen(false)};
+
+    const handleChatBarOpen = () => { setIsChatBarOpen(true) };
+    const handleChatBarChange = (e) => { setPriority(e.target.value) };
+
     if(showModal){
         return(
         <Modal scrollable={true} ariaHideApp={false} isOpen={showModal} onRequestClose={()=>setShowModal(false) }
@@ -616,19 +635,19 @@ function Main(props){
                     </div>
                     </div>
                     
-                    <div style={{ maxHeight: "50vh", minHeight: "50vh", marginLeft: "7%", marginRight: "5%", backgroundColor: theme.innerBox}} class="search-item">
+                    <div style={{ minWidth:"24%", maxHeight: "50vh", minHeight: "50vh", marginLeft: "7%", marginRight: "3%", backgroundColor: theme.innerBox}} class="search-item">
                         <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h4"><b>Chat</b></ThemeTextTypography>
                         {chatError ? <ThemeTextTypography style={{color: "red"}}><b>{chatError}</b></ThemeTextTypography> : null}
-                        <div style={{overflowY: "auto", maxHeight: "80%", overflowX: "hidden"}}>
+                        <div style={{overflowY: "auto", maxHeight: "80%", overflowX: "hidden", wordBreak:"break-word"}}>
                             {chatData.length > 0 && chatData.map((row,idx) => (
                                 <div key={idx} style={{ textAlign: "left"}}>
-                                    <ThemeTextTypography style={{fontFamily: "Georgia"}} variant="h6" display="inline" ><b>{row.from} : </b></ThemeTextTypography>
+                                    {row.priority === "High" ? <ThemeTextTypography style={{fontFamily: "Georgia", color: "#f5190a"}} variant="h6" display="inline" ><b>{row.from} : </b></ThemeTextTypography> : <ThemeTextTypography style={{fontFamily: "Georgia", color: "#06d64f"}} variant="h6" display="inline" ><b>{row.from} : </b></ThemeTextTypography>}
                                     <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.text}</ThemeTextTypography>
                                 </div>
                             ))}
                             <div ref={divRef} className="list-bottom"></div>
                         </div>
-                        <TextField label="Type Your Message" type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><Button style={{ marginBottom: "25%", backgroundColor: theme.button, color: theme.text }} onClick={addChat}>Send</Button></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ position: "fixed", bottom: "27%", right: "4.8%", backgroundColor: theme.input }} value={chatValue} onChange={(e) => setChatValue(e.target.value)} />                        
+                        <TextField label="Type Your Message" multiline rowsMax={2} type="text" InputLabelProps={{ style: { color: theme.placeholder, fontSize: "22px"}}} InputProps={{ endAdornment: ( <InputAdornment><div className="outer"><div className="top">{chatValue.length > 0 ?<Select className={classes.select} inputProps={{ classes: { icon: classes.icon }}} open={isChatBarOpen} onClose={handleChatBarClose} onOpen={handleChatBarOpen} onChange={handleChatBarChange} value={priority}><MenuItem value={"Low"}>Low</MenuItem> <MenuItem value={"High"}>High</MenuItem></Select> : null}</div><div className="below"><SendIcon style={{ marginBottom: "50%", height:"35px", cursor:"pointer", color: theme.text }} onClick={addChat} /></div></div></InputAdornment>), className: isLightTheme ? classes.light: classes.dark }} style={{ position: "fixed", bottom: "27%", right: "3%", width:"25.3%", backgroundColor: theme.input }} value={chatValue} onChange={(e) => setChatValue(e.target.value)} />                      
                     </div>
                 </div>
                 </DragDropContext>

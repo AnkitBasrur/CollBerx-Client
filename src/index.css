@@ -49,3 +49,16 @@ code {
 .nav-list:hover {
   background-color: rgb(99, 99, 99)
 }
+
+.outer {
+  display: grid;
+  
+  grid-template: 1fr / 1fr;
+  place-items: center;
+}
+.below {
+  z-index: 2;
+}
+ .top {
+  z-index: 1;
+}

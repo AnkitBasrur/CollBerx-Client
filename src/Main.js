@@ -116,7 +116,7 @@ function Main(props){
 
     useEffect(() => {
         const fetchData = async() => {
-            const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("email")}`)
+            const res = await axios.get(`http://localhost:3000/getPendingData/${id}/${sessionStorage.getItem("email")}`)
             setAuthLevel(res.data.authLevel)
             if(props.location.state.newUser && isNewUser){
                 socket.emit("new data", { data: res.data.data, message: `Welcome to the team ${sessionStorage.getItem("name")}` })
@@ -127,7 +127,8 @@ function Main(props){
             setBroadcastMessage({});
             setRefresh(false)
             socket.on("new data from server", (arg1) => {
-                if(arg1.data.message){
+                console.log(arg1.data.from, sessionStorage.getItem("name"))
+                if(arg1.data.message && arg1.data.from !== sessionStorage.getItem("name")){
                     setSnackBarMessage({...snackBarMessage ,from: arg1.data.from, message: arg1.data.message })
                     setShowSnackbar(true)
                 }
@@ -306,7 +307,7 @@ function Main(props){
             return;
         }
         if(priority === "High") 
-            setBroadcastMessage( {...broadcastMessage, from: '', message: `Received High Priority Message from ${sessionStorage.getItem("name")}: ${chatValue}`});
+            setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Received High Priority Message from ${sessionStorage.getItem("name")}: ${chatValue}`});
 
         await axios.post('http://localhost:3000/addChat', { id, text: chatValue, fromName: sessionStorage.getItem("name"), fromEmail: sessionStorage.getItem("email"), chatID: uuid(), priority })
         setChatValue('')

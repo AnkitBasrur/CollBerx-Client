@@ -48,7 +48,7 @@ function NavBar(props){
 
     return (
       <div>
-        <AppBar style={{ backgroundColor:  theme.navbar }} position="static">
+        <AppBar style={{ backgroundColor:  theme.navbar }} position="fixed">
           <Toolbar variant="dense" >
             <ThemeTextTypography  onClick={() => history.push('/home')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "7%"}}>
               CollBerx
@@ -79,7 +79,7 @@ function NavBar(props){
             >
               <MenuItem onClick={handleClose}><ThemeTextTypography>Profile</ThemeTextTypography></MenuItem>
               <MenuItem onClick={handleClose}><ThemeTextTypography>My account</ThemeTextTypography></MenuItem>
-              <MenuItem onClick={() => { sessionStorage.removeItem("email");history.push('/') }}><ThemeTextTypography>Logout</ThemeTextTypography></MenuItem>
+              <MenuItem onClick={() => { sessionStorage.clear(); history.push('/') }}><ThemeTextTypography>Logout</ThemeTextTypography></MenuItem>
             </Menu>
 
           </Toolbar>

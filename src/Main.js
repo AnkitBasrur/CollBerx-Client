@@ -52,7 +52,7 @@ const styles = {
     }
 };
 
-const socket = io("http://localhost:3000/", connectionOptions);
+const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
 
 function Main(props){
     const history = useHistory()
@@ -88,13 +88,14 @@ function Main(props){
     const [activeData, setActiveData] = useState([]);
     const [completedData, setCompletedData] = useState([]);
     const [chatData, setChatData] = useState([]);
+    const [logsData, setLogsData] = useState([]);
     const [refresh, setRefresh] = useState(true);
     const [chatValue, setChatValue] = useState('')
     const [authLevel, setAuthLevel] = useState('')
     const [showModal, setShowModal] = useState(false)
     const [showSnackbar, setShowSnackbar] = useState(false)
-    const [isNewUser, setIsNewUser] = useState(true) 
     const [isChatBarOpen, setIsChatBarOpen] = useState(false) 
+    const [showLogs, setShowLogs] = useState(false) 
     const [project, setProject] = useState("");
     const [pendingError, setPendingError] = useState('');
     const [activeError, setActiveError] = useState('');
@@ -116,14 +117,13 @@ function Main(props){
 
     useEffect(() => {
         const fetchData = async() => {
-            const res = await axios.get(`http://localhost:3000/getPendingData/${id}/${sessionStorage.getItem("email")}`)
+            const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("email")}`)
             setAuthLevel(res.data.authLevel)
-            if(props.location.state.newUser && isNewUser){
+            if(props.location.state.newUser && sessionStorage.getItem("roomID") && sessionStorage.getItem("roomID") != id)
                 socket.emit("new data", { data: res.data.data, message: `Welcome to the team ${sessionStorage.getItem("name")}` })
-                setIsNewUser(false)
-            }
             else
                 socket.emit("new data", { data: res.data.data, from: broadcastMessage.from, message: broadcastMessage.message })
+            sessionStorage.setItem("roomID", id)
             setBroadcastMessage({});
             setRefresh(false)
             socket.on("new data from server", (arg1) => {
@@ -138,6 +138,8 @@ function Main(props){
                     history.push('/home')
                 else{
                     setAuthLevel(user.authLevel)
+                    console.log(arg1.data.data)
+                    setLogsData(arg1.data.data.logs);
                     setPendingData(arg1.data.data.pending)
                     setActiveData(arg1.data.data.ongoing)
                     setCompletedData(arg1.data.data.finsished)
@@ -168,7 +170,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Changed Auth Level of ${user} to ${level}`});
-        await axios.post('http://localhost:3000/changeAuth', {id, user, level, date, from: sessionStorage.getItem("name")});
+        await axios.post('https://rooms-server-side.herokuapp.com/changeAuth', {id, user, level, date, from: sessionStorage.getItem("name")});
         setRefresh(true)
     }
     const addPending = async () => {
@@ -189,7 +191,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Added ${pendingValue} into Pending Task`});
-        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
+        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
         setRefresh(true)
         setPendingValue('')
     }
@@ -211,7 +213,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Added ${completedValue} into Completed Task`});
-        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("name"), completedAt: date })
+        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("name"), completedAt: date })
         setRefresh(true)
         setCompletedValue('')
     }
@@ -233,7 +235,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Added ${activeValue} into Active Task`});
-        await axios.post('http://localhost:3000/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
+        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
         setRefresh(true)
         setActiveValue('')
     }
@@ -263,7 +265,7 @@ function Main(props){
             var dt = new Date();
             var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Removed ${name} from ${type} Task`});
-            await axios.post('http://localhost:3000/removeData', { id, taskID, type, name, date, userID: sessionStorage.getItem("name")})
+            await axios.post('https://rooms-server-side.herokuapp.com/removeData', { id, taskID, type, name, date, userID: sessionStorage.getItem("name")})
             setRefresh(true)
         }
     }
@@ -295,7 +297,7 @@ function Main(props){
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${name} from Active to Completed Task`});
         else if(type === "Pending")
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${name} from Pending to Active Task`});
-        await axios.post('http://localhost:3000/nextLevel', { id, taskID, createdBy, name, createdAt, type, completedAt })
+        await axios.post('https://rooms-server-side.herokuapp.com/nextLevel', { id, taskID, createdBy, name, createdAt, type, completedAt })
         setRefresh(true)
     }
     const addChat = async() => {
@@ -309,7 +311,7 @@ function Main(props){
         if(priority === "High") 
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Received High Priority Message from ${sessionStorage.getItem("name")}: ${chatValue}`});
 
-        await axios.post('http://localhost:3000/addChat', { id, text: chatValue, fromName: sessionStorage.getItem("name"), fromEmail: sessionStorage.getItem("email"), chatID: uuid(), priority })
+        await axios.post('https://rooms-server-side.herokuapp.com/addChat', { id, text: chatValue, fromName: sessionStorage.getItem("name"), fromEmail: sessionStorage.getItem("email"), chatID: uuid(), priority })
         setChatValue('')
         setPriority("Low")
         setRefresh(true)
@@ -320,7 +322,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${dragName} from ${source.droppableId} to ${destination.droppableId} Task`});
-        await axios.post('http://localhost:3000/drag', {source, destination, draggableId: result.draggableId, id, date, from: sessionStorage.getItem("name")});
+        await axios.post('https://rooms-server-side.herokuapp.com/drag', {source, destination, draggableId: result.draggableId, id, date, from: sessionStorage.getItem("name")});
         setRefresh(true)
     }
     const handleClick = (event, id, authLevel) => {
@@ -349,7 +351,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Blocked user ${user.id}`});
-        await axios.post(`http://localhost:3000/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("name")})
+        await axios.post(`https://rooms-server-side.herokuapp.com/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
     const removeUser = async(user) => {
@@ -370,7 +372,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Removed user ${user.id}`});
-        await axios.post(`http://localhost:3000/removeUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("name")})
+        await axios.post(`https://rooms-server-side.herokuapp.com/removeUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
     const handleCloseSnackbar = () => { 
@@ -382,7 +384,11 @@ function Main(props){
     const handleChatBarOpen = () => { setIsChatBarOpen(true) };
     const handleChatBarChange = (e) => { setPriority(e.target.value) };
 
-    if(showModal){
+    if(showLogs){
+        history.push({ pathname: `/${id}/logs`, state: { logs: logsData }})
+        setShowLogs(false)
+    }
+    else if(showModal){
         return(
         <Modal scrollable={true} ariaHideApp={false} isOpen={showModal} onRequestClose={()=>setShowModal(false) }
         style={outerModal} >
@@ -437,12 +443,12 @@ function Main(props){
                 onClose={handleCloseSnackbar}
                 message={ <Typography>{snackBarMessage.from ? <div><b>{snackBarMessage.from} :</b> {snackBarMessage.message}</div> : snackBarMessage.message ? snackBarMessage.message : null}</Typography> }
             />
-            <div style={{ minHeight: "93.5vh", backgroundColor: theme.ui}}>
+            <div style={{ minHeight: "91.9vh", paddingTop:"4%", backgroundColor: theme.ui}}>
                 <div style={{textAlign: "center"}}>
                     <ThemeTextTypography display="inline" style={{fontWeight: "bold", fontFamily:"serif"}} variant="h3">{project.name}</ThemeTextTypography>
                     <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id); setShowSnackbar(true); setSnackBarMessage({message:"Room ID copied to clipboard !"})}} variant="h4">🔗</ThemeTextTypography>
                     {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
-                    <LibraryBooksIcon style={{cursor: "pointer", color: theme.text, marginLeft: "5%"}} fontSize="large" />
+                    <LibraryBooksIcon onClick={() => setShowLogs(true)} style={{cursor: "pointer", color: theme.text, marginLeft: "5%"}} fontSize="large" />
                 </div>
                 <DragDropContext onDragEnd={result => onDragEnd(result)}>
 

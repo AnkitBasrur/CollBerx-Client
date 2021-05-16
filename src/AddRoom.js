@@ -5,7 +5,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { useHistory } from 'react-router-dom';
 import { useContext } from "react";
 import {ThemeContext} from './contexts/ThemeContext'
-import { Button, Card, CardActionArea, CardContent, Grid, TextField, Typography } from "@material-ui/core";
+import { Button, TextField, Typography } from "@material-ui/core";
 import NavBar from "./NavBar";
 
 var connectionOptions =  {
@@ -26,7 +26,7 @@ const styles = {
   }
 };
 
-const socket = io("http://localhost:3000/", connectionOptions);
+const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
 function AddRoom(props) {
   const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;
@@ -104,7 +104,7 @@ function AddRoom(props) {
   return (
     <>
     <NavBar />
-    <div className="App" style={{ display:"flex", height: "93.5vh", backgroundColor:theme.ui }}>
+    <div className="App" style={{ display:"flex", height: "91.9vh", paddingTop: "4%", backgroundColor:theme.ui }}>
       <div style={{width:"50%", marginTop:"3%"}}>
         <div style={{marginLeft:"20%", paddingTop:"5%", height:"40%", marginRight:"20%", backgroundColor: theme.innerBox}}>
           <ThemeTextTypography variant="h4">Join Room</ThemeTextTypography>

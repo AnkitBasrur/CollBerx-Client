@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import { useContext } from "react"
 import { withStyles } from "@material-ui/core/styles";
 import {ThemeContext} from './contexts/ThemeContext'
-import { Box, Button, TextField, Typography } from "@material-ui/core";
+import { Button, TextField, Typography } from "@material-ui/core";
 import { useCookies } from "react-cookie";
 import LoginNavBar from "./LoginNavBar";
 
@@ -52,7 +52,7 @@ function Login(props){
             }, 5000)
             return
         }
-        const res = await axios.post('http://localhost:3000/login', { email: loginEmail, password: loginPassword} )
+        const res = await axios.post('https://rooms-server-side.herokuapp.com/login', { email: loginEmail, password: loginPassword} )
         if(res.data.message === 'Success'){
             console.log(res.data)
             sessionStorage.setItem('email', loginEmail)
@@ -79,7 +79,7 @@ function Login(props){
             }, 5000)
             return
         }
-        const res = await axios.post('http://localhost:3000/signup', { name: signupName, email: signupEmail, password: signupPassword} )
+        const res = await axios.post('https://rooms-server-side.herokuapp.com/signup', { name: signupName, email: signupEmail, password: signupPassword} )
         if(res.data.message === 'Success'){
             sessionStorage.setItem('email', signupEmail)
             sessionStorage.setItem('name', signupName)

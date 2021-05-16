@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { useHistory } from 'react-router-dom';
 import { useContext } from "react";
 import {ThemeContext} from './contexts/ThemeContext'
-import { Button, Card, CardActionArea, CardContent, Grid, TextField, Typography } from "@material-ui/core";
+import { Card, CardActionArea, CardContent, Grid, Typography } from "@material-ui/core";
 import NavBar from "./NavBar";
 import axios from "axios";
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
@@ -34,6 +34,7 @@ function Home() {
   })(Typography);
 
   useEffect(async () => {
+    sessionStorage.setItem("roomID", "a")
     if(shouldFetch){
       const projects = await axios.get(`https://rooms-server-side.herokuapp.com/getProjects/${sessionStorage.getItem("email")}`)
       setProjects(projects.data.room)
@@ -51,7 +52,7 @@ function Home() {
   return (
     <div >
     <NavBar />
-    <div className="App" style={{ minHeight: "93.5vh", width: "100%", backgroundColor:theme.ui }}>
+    <div className="App" style={{ paddingTop: "3%", minHeight: "93.9vh", width: "100%", backgroundColor:theme.ui }}>
       <ThemeTextTypography style={{fontFamily: "Verdana", marginBottom: "1%", paddingTop: "1%"}} variant="h4"><b>Your Rooms:</b></ThemeTextTypography>
         <Grid container style={{paddingLeft: "8%"}}>
                 {projects.map((row,i)=>{
@@ -82,7 +83,6 @@ function Home() {
                     )
                 })}
           </Grid>
-      {/* <Button style={{backgroundColor: theme.button, color: theme.text }} onClick={(e) =>leaveRoom(e)}>Leave Room</Button> */}
     </div>
     </div>
   );

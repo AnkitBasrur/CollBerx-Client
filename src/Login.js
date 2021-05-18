@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from 'axios';
 import { useHistory } from "react-router-dom";
 import { useContext } from "react"
@@ -42,6 +42,41 @@ function Login(props){
         }
     })(Typography);
 
+    useEffect(() => {
+        const code =
+        window.location.href.match(/\?code=(.*)/) &&
+        window.location.href.match(/\?code=(.*)/)[1];
+        console.log(code);
+        var token = '';
+
+        if(code){
+            axios({
+                method: 'get',
+                url: `http://localhost:3000/${code}`,
+                headers: {
+                    accept: 'application/json'
+                }
+            }).then(async(response) => {
+                console.log(response)
+                token = response.data.token;
+                axios({
+                    method: 'get',
+                    url: `https://api.github.com/user`,
+                    headers: {
+                      Authorization: 'token ' + token
+                    }
+                  }).then(async(response) => {
+                    var name = response.data.name;
+                    if(response.data.name == null)
+                      name = response.data.login
+                    await axios.get(`http://localhost:3000/get-repos/${response.data.login}/${name}/${token}`)
+                    sessionStorage.setItem('email', response.data.login)
+                    sessionStorage.setItem('name', name)
+                    history.push('/home')
+                })
+            })
+        }
+    })
     const loginFunction = async(e) => {
         e.preventDefault();
         // if(!loginUsername){
@@ -92,6 +127,7 @@ function Login(props){
             }, 5000)
         }
     }
+    
     return (
         <div style={{ paddingBottom: "10%", minHeight: "79.5vh", backgroundColor: theme.ui}}>
         <LoginNavBar />
@@ -99,7 +135,7 @@ function Login(props){
                 <a
                     style={{color: theme.text}}
                     className="login-link"
-                    href={`https://github.com/login/oauth/authorize?scope=user&client_id=d38bd993581d49e7499c`}
+                    href={`https://github.com/login/oauth/authorize?scope=user&client_id=d38bd993581d49e7499c&redirect_uri=http://localhost:3001/`}
                     onClick={() => {
                     setData({ ...data, errorMessage: "" });
                     }}

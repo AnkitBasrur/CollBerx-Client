@@ -120,7 +120,7 @@ function Login(props){
                 <a
                     style={{color: theme.text}}
                     className="login-link"
-                    href={`https://github.com/login/oauth/authorize?scope=user&client_id=d38bd993581d49e7499c&redirect_uri=http://localhost:3001/`}
+                    href={`https://github.com/login/oauth/authorize?scope=user&client_id=d38bd993581d49e7499c`}
                 >
                     <GitHubIcon />
                     <span className="link-text"> Login with GitHub</span>

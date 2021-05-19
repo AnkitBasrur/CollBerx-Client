@@ -86,7 +86,7 @@ function AddRoom(props) {
       }, 5000)
       return;
     }
-    socket.emit('join', code, password, sessionStorage.getItem("email"), sessionStorage.getItem("name"));    
+    socket.emit('join', code, password, sessionStorage.getItem("username"), sessionStorage.getItem("name"));    
   }
 
   function createRoom(e){
@@ -98,7 +98,7 @@ function AddRoom(props) {
       }, 5000)
       return;
     }
-    socket.emit("create room", newRoomPassword, sessionStorage.getItem("email"), newRoomName, sessionStorage.getItem("name"));
+    socket.emit("create room", newRoomPassword, sessionStorage.getItem("username"), newRoomName, sessionStorage.getItem("name"));
   }
   
   return (

@@ -117,7 +117,7 @@ function Main(props){
 
     useEffect(() => {
         const fetchData = async() => {
-            const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("email")}`)
+            const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("username")}`)
             setAuthLevel(res.data.authLevel)
             if(props.location.state.newUser && sessionStorage.getItem("roomID") && sessionStorage.getItem("roomID") != id)
                 socket.emit("new data", { data: res.data.data, message: `Welcome to the team ${sessionStorage.getItem("name")}` })
@@ -127,18 +127,16 @@ function Main(props){
             setBroadcastMessage({});
             setRefresh(false)
             socket.on("new data from server", (arg1) => {
-                console.log(arg1.data.from, sessionStorage.getItem("name"))
                 if(arg1.data.message && arg1.data.from !== sessionStorage.getItem("name")){
                     setSnackBarMessage({...snackBarMessage ,from: arg1.data.from, message: arg1.data.message })
                     setShowSnackbar(true)
                 }
                 setProject(arg1.data.data)
-                const user = arg1.data.data.members.find((member) => member.id === sessionStorage.getItem("email"));
+                const user = arg1.data.data.members.find((member) => member.id === sessionStorage.getItem("username"));
                 if(!user)
                     history.push('/home')
                 else{
                     setAuthLevel(user.authLevel)
-                    console.log(arg1.data.data)
                     setLogsData(arg1.data.data.logs);
                     setPendingData(arg1.data.data.pending)
                     setActiveData(arg1.data.data.ongoing)
@@ -153,7 +151,7 @@ function Main(props){
     }, [refresh])
 
     const changeAuthLevel = async(user, level) => {
-        if(user === sessionStorage.getItem("email")){
+        if(user === sessionStorage.getItem("username")){
             setChangeAuthError("Cannot change your own level");
             setTimeout(() => {
                 setChangeAuthError("");
@@ -297,7 +295,7 @@ function Main(props){
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${name} from Active to Completed Task`});
         else if(type === "Pending")
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${name} from Pending to Active Task`});
-        await axios.post('https://rooms-server-side.herokuapp.com/nextLevel', { id, taskID, createdBy, name, createdAt, type, completedAt })
+        await axios.post('https://rooms-server-side.herokuapp.com/nextLevel', { id, taskID, createdBy, name, createdAt, type, completedAt, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
     const addChat = async() => {
@@ -311,7 +309,7 @@ function Main(props){
         if(priority === "High") 
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Received High Priority Message from ${sessionStorage.getItem("name")}: ${chatValue}`});
 
-        await axios.post('https://rooms-server-side.herokuapp.com/addChat', { id, text: chatValue, fromName: sessionStorage.getItem("name"), fromEmail: sessionStorage.getItem("email"), chatID: uuid(), priority })
+        await axios.post('https://rooms-server-side.herokuapp.com/addChat', { id, text: chatValue, fromName: sessionStorage.getItem("name"), fromUserName: sessionStorage.getItem("username"), chatID: uuid(), priority })
         setChatValue('')
         setPriority("Low")
         setRefresh(true)
@@ -334,7 +332,7 @@ function Main(props){
         setAnchorEl(null);
     };
     const blockUser = async(user) => {
-        if(user.id === sessionStorage.getItem("email")){
+        if(user.id === sessionStorage.getItem("username")){
             setChangeAuthError("Illegal option");
             setTimeout(() => {
                 setChangeAuthError("");
@@ -355,7 +353,7 @@ function Main(props){
         setRefresh(true)
     }
     const removeUser = async(user) => {
-        if(user.id === sessionStorage.getItem("email")){
+        if(user.id === sessionStorage.getItem("username")){
             setChangeAuthError("Illegal option");
             setTimeout(() => {
                 setChangeAuthError("");
@@ -445,7 +443,7 @@ function Main(props){
             />
             <div style={{ minHeight: "91.9vh", paddingTop:"4%", backgroundColor: theme.ui}}>
                 <div style={{textAlign: "center"}}>
-                    <ThemeTextTypography display="inline" style={{fontWeight: "bold", fontFamily:"serif"}} variant="h3">{project.name}</ThemeTextTypography>
+                    <ThemeTextTypography display="inline" style={{fontWeight: "bold", fontFamily:"serif", width:"10px"}} variant="h3">{project.name}</ThemeTextTypography>
                     <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id); setShowSnackbar(true); setSnackBarMessage({message:"Room ID copied to clipboard !"})}} variant="h4">🔗</ThemeTextTypography>
                     {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
                     <LibraryBooksIcon onClick={() => setShowLogs(true)} style={{cursor: "pointer", color: theme.text, marginLeft: "5%"}} fontSize="large" />
@@ -495,13 +493,15 @@ function Main(props){
                                                     ...provided.draggableProps.style
                                                     }}
                                             >
-                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", float: "left", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth:"80%"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                                                 <div style={{float: "right"}}>
                                                     <DoneIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Pending")} />
                                                     <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Pending", row.name)} />
                                                 </div><br />
-                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
-                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
+                                                <div style={{marginTop: "5%"}}>
+                                                    <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth:"59%"}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
+                                                    <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
+                                                </div>
                                             </div>
                                         );
                                     }}
@@ -558,13 +558,15 @@ function Main(props){
                                                     ...provided.draggableProps.style
                                                     }}
                                             >
-                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", float: "left", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth:"80%"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                                                 <div style={{float: "right"}}>
                                                     <DoneIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => nextLevel(row.taskID, row.createdBy, row.name, row.createdAt, "Active")} />
                                                     <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Active",row.name)} />
                                                 </div><br />
-                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
-                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
+                                                <div style={{marginTop: "5%"}}>
+                                                    <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth:"59%"}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
+                                                    <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
+                                                </div>
                                             </div>
                                         );
                                     }}
@@ -621,12 +623,14 @@ function Main(props){
                                                     ...provided.draggableProps.style
                                                     }}
                                             >
-                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
+                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", float: "left", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth:"80%"}} variant="h6" display="inline" >{row.name}</ThemeTextTypography>
                                                 <div style={{float: "right"}}>
                                                     <CancelIcon style={{ cursor: "pointer", color: theme.text}} onClick={() => removeData(row.taskID, "Completed",row.name)} />
                                                 </div><br />
-                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
-                                                <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
+                                                <div style={{marginTop: "5%"}}>
+                                                    <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "left",  float:"left", color: theme.textNotImp, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth:"59%"}} variant="h6" >- {row.createdBy}</ThemeTextTypography>
+                                                    <ThemeTextTypography style={{fontFamily: "DejaVu Sans Mono, monospace", textAlign: "right", float: "right", color: theme.textNotImp}} variant="h6">{row.createdAt}</ThemeTextTypography>
+                                                </div>
                                             </div>
                                         );
                                     }}

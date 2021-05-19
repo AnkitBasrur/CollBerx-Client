@@ -67,7 +67,7 @@ function NavBar(props){
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>
             <Button aria-controls="simple-menu" aria-haspopup="true" style={{ marginLeft: "7%", fontFamily: "Arial" }} onClick={handleClick}>
-              <ThemeTextTypography variant="h6" style={{textTransform:"none", color: "tomato"}}>Hello, {sessionStorage.getItem("name")} <ArrowDropDownIcon style={{verticalAlign: "text-top"}} /></ThemeTextTypography>
+              <ThemeTextTypography variant="h6" style={{textTransform:"none", color: "tomato", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth:"100%"}}>Hello, {sessionStorage.getItem("name")} <ArrowDropDownIcon style={{verticalAlign: "text-top"}} /></ThemeTextTypography>
             </Button>
             <Menu
               id="simple-menu"

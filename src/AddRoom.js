@@ -57,7 +57,8 @@ function AddRoom(props) {
 
 
   useEffect(async () => {
-    
+    if(!sessionStorage.getItem("username"))
+        history.push('/')
     socket.on("Hey", (arg1) => {
       if(arg1.err){
         setJoinRoomError(arg1.err);

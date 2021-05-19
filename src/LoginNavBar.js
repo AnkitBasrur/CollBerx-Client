@@ -36,8 +36,11 @@ function LoginNavBar(props){
       <div style={{minHeight: "25%"}}>
         <AppBar style={{ minHeight: "25%", backgroundColor: theme.navbar }} position="static">
           <Toolbar variant="dense" style={{ marginBottom: "1%", marginTop: "1%"}}>
-            <ThemeTextTypography onClick={() => history.push('/')} variant="h4" style={{ fontFamily: "Trajan", cursor: "pointer", marginLeft: "5%"}}>
-              TeamX Rooms
+          <ThemeTextTypography  onClick={() => history.push('/')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "7%"}}>
+              CollBerx
+            </ThemeTextTypography>
+            <ThemeTextTypography display="inline" onClick={() => history.push('/')} variant="h6" style={{ color: "grey", fontFamily: "Arial", cursor: "pointer", marginLeft:"5px"}}>
+                v1.4
             </ThemeTextTypography>
             <ThemeTextTypography onClick={() => history.push('/')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "25%"}} >
               Home

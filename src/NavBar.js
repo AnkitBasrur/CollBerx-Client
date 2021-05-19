@@ -54,7 +54,7 @@ function NavBar(props){
               CollBerx
             </ThemeTextTypography>
             <ThemeTextTypography display="inline" onClick={() => history.push('/home')} variant="h6" style={{ color: "grey", fontFamily: "Arial", cursor: "pointer", marginLeft:"5px"}}>
-                v1.1
+                v1.4
             </ThemeTextTypography>
             <ThemeTextTypography  onClick={() => history.push('/home')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "20%"}}>
               Home

@@ -36,6 +36,8 @@ function Home() {
   useEffect(async () => {
     sessionStorage.setItem("roomID", "a")
     if(shouldFetch){
+      if(!sessionStorage.getItem("username"))
+        history.push('/')
       const projects = await axios.get(`https://rooms-server-side.herokuapp.com/getProjects/${sessionStorage.getItem("username")}`)
       setProjects(projects.data.room)
       setShouldFetch(false)

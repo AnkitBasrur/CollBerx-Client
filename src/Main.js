@@ -19,6 +19,7 @@ import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import Snackbar from '@material-ui/core/Snackbar';
 import React from 'react'
 import SendIcon from '@material-ui/icons/Send';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 var connectionOptions =  {
     "force new connection" : true,
@@ -116,38 +117,46 @@ function Main(props){
     })(Typography);
 
     useEffect(() => {
-        const fetchData = async() => {
-            const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("username")}`)
-            setAuthLevel(res.data.authLevel)
-            if(props.location.state.newUser && sessionStorage.getItem("roomID") && sessionStorage.getItem("roomID") != id)
-                socket.emit("new data", { data: res.data.data, message: `Welcome to the team ${sessionStorage.getItem("name")}` })
-            else
-                socket.emit("new data", { data: res.data.data, from: broadcastMessage.from, message: broadcastMessage.message })
-            sessionStorage.setItem("roomID", id)
-            setBroadcastMessage({});
-            setRefresh(false)
-            socket.on("new data from server", (arg1) => {
-                if(arg1.data.message && arg1.data.from !== sessionStorage.getItem("name")){
-                    setSnackBarMessage({...snackBarMessage ,from: arg1.data.from, message: arg1.data.message })
-                    setShowSnackbar(true)
-                }
-                setProject(arg1.data.data)
-                const user = arg1.data.data.members.find((member) => member.id === sessionStorage.getItem("username"));
-                if(!user)
+        if(!sessionStorage.getItem("username"))
+            history.push('/')
+        else{
+            const fetchData = async() => {
+                const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("username")}`)
+                if(res.data.msg === "No group found" || !props.location.state)
                     history.push('/home')
                 else{
-                    setAuthLevel(user.authLevel)
-                    setLogsData(arg1.data.data.logs);
-                    setPendingData(arg1.data.data.pending)
-                    setActiveData(arg1.data.data.ongoing)
-                    setCompletedData(arg1.data.data.finsished)
-                    setChatData(arg1.data.data.chat);
-                    divRef && divRef.current && divRef.current.scrollIntoView && divRef.current.scrollIntoView({ behavior: 'smooth', block: 'end'});
+                    setAuthLevel(res.data.authLevel)
+                    if(props.location.state.newUser && sessionStorage.getItem("roomID") && sessionStorage.getItem("roomID") != id)
+                        socket.emit("new data", { data: res.data.data, message: `Welcome to the team ${sessionStorage.getItem("name")}` })
+                    else
+                        socket.emit("new data", { data: res.data.data, from: broadcastMessage.from, message: broadcastMessage.message })
+                    sessionStorage.setItem("roomID", id)
+                    setBroadcastMessage({});
+                    setRefresh(false)
+                    socket.on("new data from server", (arg1) => {
+                        if(arg1.data.message && arg1.data.from !== sessionStorage.getItem("name")){
+                            setSnackBarMessage({...snackBarMessage ,from: arg1.data.from, message: arg1.data.message })
+                            setShowSnackbar(true)
+                        }
+                        setProject(arg1.data.data)
+                        const user = arg1.data.data.members.find((member) => member.id === sessionStorage.getItem("username"));
+                        if(!user)
+                            history.push('/home')
+                        else{
+                            setAuthLevel(user.authLevel)
+                            setLogsData(arg1.data.data.logs);
+                            setPendingData(arg1.data.data.pending)
+                            setActiveData(arg1.data.data.ongoing)
+                            setCompletedData(arg1.data.data.finsished)
+                            setChatData(arg1.data.data.chat);
+                            divRef && divRef.current && divRef.current.scrollIntoView && divRef.current.scrollIntoView({ behavior: 'smooth', block: 'end'});
+                        }
+                    });
                 }
-            });
+            } 
+            if(refresh)
+                fetchData()
         }
-        if(refresh)
-            fetchData()
     }, [refresh])
 
     const changeAuthLevel = async(user, level) => {
@@ -370,7 +379,8 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Removed user ${user.id}`});
-        await axios.post(`https://rooms-server-side.herokuapp.com/removeUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("name")})
+        const log = `Removed ${sessionStorage.getItem("username")}`
+        await axios.post(`https://rooms-server-side.herokuapp.com/removeUser/${user.id}/${id}/${log}`, {date, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
     const handleCloseSnackbar = () => { 
@@ -381,6 +391,13 @@ function Main(props){
 
     const handleChatBarOpen = () => { setIsChatBarOpen(true) };
     const handleChatBarChange = (e) => { setPriority(e.target.value) };
+    const leaveGroup = async() => { 
+        var dt = new Date();
+        var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        const log = `${sessionStorage.getItem("username")} left the group`
+        await axios.post(`https://rooms-server-side.herokuapp.com/removeUser/${sessionStorage.getItem("username")}/${id}/${log}`, {date, from: sessionStorage.getItem("name")})
+        setRefresh(true)
+    }
 
     if(showLogs){
         history.push({ pathname: `/${id}/logs`, state: { logs: logsData }})
@@ -442,11 +459,12 @@ function Main(props){
                 message={ <Typography>{snackBarMessage.from ? <div><b>{snackBarMessage.from} :</b> {snackBarMessage.message}</div> : snackBarMessage.message ? snackBarMessage.message : null}</Typography> }
             />
             <div style={{ minHeight: "91.9vh", paddingTop:"4%", backgroundColor: theme.ui}}>
-                <div style={{textAlign: "center"}}>
+                <div style={{textAlign: "center", marginLeft: "15%"}}>
                     <ThemeTextTypography display="inline" style={{fontWeight: "bold", fontFamily:"serif", width:"10px"}} variant="h3">{project.name}</ThemeTextTypography>
                     <ThemeTextTypography style={{ cursor: "pointer" }} display="inline" onClick={() => {navigator.clipboard.writeText(id); setShowSnackbar(true); setSnackBarMessage({message:"Room ID copied to clipboard !"})}} variant="h4">🔗</ThemeTextTypography>
                     {project.members ?<PeopleAltIcon style={{ cursor: "pointer", marginLeft: "5%", color: theme.text}} fontSize="large" onClick={() => setShowModal(true)}/> : null }
                     <LibraryBooksIcon onClick={() => setShowLogs(true)} style={{cursor: "pointer", color: theme.text, marginLeft: "5%"}} fontSize="large" />
+                    <Button onClick={() => leaveGroup()}style={{ marginRight:"15%", float: "right", border: "1px solid white"}}><ThemeTextTypography><ExitToAppIcon /><span style={{verticalAlign:"text-bottom"}}>Leave Team</span></ThemeTextTypography></Button>
                 </div>
                 <DragDropContext onDragEnd={result => onDragEnd(result)}>
 

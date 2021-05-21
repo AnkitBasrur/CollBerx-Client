@@ -20,6 +20,8 @@ const styles = {
   }
 };
 
+const { REACT_APP_BACKEND_URL } = process.env;
+
 function Home() {
   const { isLightTheme, light, dark } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;
@@ -40,7 +42,7 @@ function Home() {
   useEffect(async () => {
     sessionStorage.setItem("roomID", "a")
     if(shouldFetch){
-      const projects = await axios.get(`https://rooms-server-side.herokuapp.com/getProjects/${sessionStorage.getItem("username")}`)
+      const projects = await axios.get(`${REACT_APP_BACKEND_URL}/getProjects/${sessionStorage.getItem("username")}`)
       setProjects(projects.data.room)
       setGitCount(projects.data.gitCount);
       setShouldFetch(false)

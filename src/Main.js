@@ -28,6 +28,8 @@ var connectionOptions =  {
     "transports" : ["websocket"]
 };
 
+const { REACT_APP_BACKEND_URL } = process.env;
+console.log(process.env)
 const { uuid } = require('uuidv4');
 const styles = {
     light: {
@@ -53,7 +55,7 @@ const styles = {
     }
 };
 
-const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
+const socket = io(`${REACT_APP_BACKEND_URL}/`, connectionOptions);
 
 function Main(props){
     const history = useHistory()
@@ -121,7 +123,7 @@ function Main(props){
             history.push('/')
         else{
             const fetchData = async() => {
-                const res = await axios.get(`https://rooms-server-side.herokuapp.com/getPendingData/${id}/${sessionStorage.getItem("username")}`)
+                const res = await axios.get(`${REACT_APP_BACKEND_URL}/getPendingData/${id}/${sessionStorage.getItem("username")}`)
                 if(res.data.msg === "No group found" || !props.location.state)
                     history.push('/home')
                 else{
@@ -177,7 +179,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Changed Auth Level of ${user} to ${level}`});
-        await axios.post('https://rooms-server-side.herokuapp.com/changeAuth', {id, user, level, date, from: sessionStorage.getItem("name")});
+        await axios.post(`${REACT_APP_BACKEND_URL}/changeAuth`, {id, user, level, date, from: sessionStorage.getItem("name")});
         setRefresh(true)
     }
     const addPending = async () => {
@@ -198,7 +200,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Added ${pendingValue} into Pending Task`});
-        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
+        await axios.post(`${REACT_APP_BACKEND_URL}/addData`, { roomID: id, type:"Pending", taskID: uuid(), name: pendingValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
         setRefresh(true)
         setPendingValue('')
     }
@@ -220,7 +222,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Added ${completedValue} into Completed Task`});
-        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("name"), completedAt: date })
+        await axios.post(`${REACT_APP_BACKEND_URL}/addData`, { roomID: id, type:"Completed", taskID: uuid(), name: completedValue, createdAt: date, createdBy: sessionStorage.getItem("name"), completedAt: date })
         setRefresh(true)
         setCompletedValue('')
     }
@@ -242,7 +244,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Added ${activeValue} into Active Task`});
-        await axios.post('https://rooms-server-side.herokuapp.com/addData', { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
+        await axios.post(`${REACT_APP_BACKEND_URL}/addData`, { roomID: id, type:"Active", taskID: uuid(), name: activeValue, createdAt: date, createdBy: sessionStorage.getItem("name") })
         setRefresh(true)
         setActiveValue('')
     }
@@ -272,7 +274,7 @@ function Main(props){
             var dt = new Date();
             var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Removed ${name} from ${type} Task`});
-            await axios.post('https://rooms-server-side.herokuapp.com/removeData', { id, taskID, type, name, date, userID: sessionStorage.getItem("name")})
+            await axios.post(`${REACT_APP_BACKEND_URL}/removeData`, { id, taskID, type, name, date, userID: sessionStorage.getItem("name")})
             setRefresh(true)
         }
     }
@@ -304,7 +306,7 @@ function Main(props){
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${name} from Active to Completed Task`});
         else if(type === "Pending")
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${name} from Pending to Active Task`});
-        await axios.post('https://rooms-server-side.herokuapp.com/nextLevel', { id, taskID, createdBy, name, createdAt, type, completedAt, from: sessionStorage.getItem("name")})
+        await axios.post(`${REACT_APP_BACKEND_URL}/nextLevel`, { id, taskID, createdBy, name, createdAt, type, completedAt, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
     const addChat = async() => {
@@ -318,7 +320,7 @@ function Main(props){
         if(priority === "High") 
             setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Received High Priority Message from ${sessionStorage.getItem("name")}: ${chatValue}`});
 
-        await axios.post('https://rooms-server-side.herokuapp.com/addChat', { id, text: chatValue, fromName: sessionStorage.getItem("name"), fromUserName: sessionStorage.getItem("username"), chatID: uuid(), priority })
+        await axios.post(`${REACT_APP_BACKEND_URL}/addChat`, { id, text: chatValue, fromName: sessionStorage.getItem("name"), fromUserName: sessionStorage.getItem("username"), chatID: uuid(), priority })
         setChatValue('')
         setPriority("Low")
         setRefresh(true)
@@ -329,7 +331,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Moved ${dragName} from ${source.droppableId} to ${destination.droppableId} Task`});
-        await axios.post('https://rooms-server-side.herokuapp.com/drag', {source, destination, draggableId: result.draggableId, id, date, from: sessionStorage.getItem("name")});
+        await axios.post(`${REACT_APP_BACKEND_URL}/drag`, {source, destination, draggableId: result.draggableId, id, date, from: sessionStorage.getItem("name")});
         setRefresh(true)
     }
     const handleClick = (event, id, authLevel) => {
@@ -358,7 +360,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Blocked user ${user.id}`});
-        await axios.post(`https://rooms-server-side.herokuapp.com/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("name")})
+        await axios.post(`${REACT_APP_BACKEND_URL}/blockUser/${user.id}/${id}`, {date, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
     const removeUser = async(user) => {
@@ -380,7 +382,7 @@ function Main(props){
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         setBroadcastMessage( {...broadcastMessage, from: sessionStorage.getItem("name"), message: `Removed user ${user.id}`});
         const log = `Removed ${sessionStorage.getItem("username")}`
-        await axios.post(`https://rooms-server-side.herokuapp.com/removeUser/${user.id}/${id}/${log}`, {date, from: sessionStorage.getItem("name")})
+        await axios.post(`${REACT_APP_BACKEND_URL}/removeUser/${user.id}/${id}/${log}`, {date, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
     const handleCloseSnackbar = () => { 
@@ -395,7 +397,7 @@ function Main(props){
         var dt = new Date();
         var date = dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
         const log = `${sessionStorage.getItem("username")} left the group`
-        await axios.post(`https://rooms-server-side.herokuapp.com/removeUser/${sessionStorage.getItem("username")}/${id}/${log}`, {date, from: sessionStorage.getItem("name")})
+        await axios.post(`${REACT_APP_BACKEND_URL}/removeUser/${sessionStorage.getItem("username")}/${id}/${log}`, {date, from: sessionStorage.getItem("name")})
         setRefresh(true)
     }
 

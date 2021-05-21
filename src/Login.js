@@ -19,6 +19,7 @@ const styles = {
         fontSize: "22px"
     }
 };
+const { REACT_APP_BACKEND_URL, REACT_APP_GITHUB_CLIENT_ID } = process.env;
 
 function Login(props){
     const { isLightTheme, light, dark } = useContext(ThemeContext);
@@ -48,9 +49,9 @@ function Login(props){
 
         if(code && showLoadingMessage.length === 0){
             setShowLoadingMessage("Verifying credentials...")
-            const tokenResponse = await axios.get(`https://rooms-server-side.herokuapp.com/access-token/${code}`)
+            const tokenResponse = await axios.get(`${REACT_APP_BACKEND_URL}/access-token/${code}`)
             setShowLoadingMessage("Getting Data from GitHub...")
-            const userResponse = await axios.get(`https://rooms-server-side.herokuapp.com/check-user/${tokenResponse.data.token}`)
+            const userResponse = await axios.get(`${REACT_APP_BACKEND_URL}/check-user/${tokenResponse.data.token}`)
             var name = userResponse.data.name;
             if(userResponse.data.name == null)
                 name = userResponse.data.username
@@ -65,7 +66,7 @@ function Login(props){
             }
             else{
                 setShowLoadingMessage("Creating A New User")
-                await axios.get(`https://rooms-server-side.herokuapp.com/get-repos/${userResponse.data.username}/${name}/${tokenResponse.data.token}`)
+                await axios.get(`${REACT_APP_BACKEND_URL}/get-repos/${userResponse.data.username}/${name}/${tokenResponse.data.token}`)
                 sessionStorage.setItem('username', userResponse.data.username)
                 sessionStorage.setItem('name', name)
                 setShowLoadingMessage("Successfully Created CollBerx Account")
@@ -85,7 +86,7 @@ function Login(props){
             }, 5000)
             return
         }
-        const res = await axios.post('https://rooms-server-side.herokuapp.com/login', { username: loginUsername, password: loginPassword} )
+        const res = await axios.post(`${REACT_APP_BACKEND_URL}/login`, { username: loginUsername, password: loginPassword} )
         if(res.data.message === 'Success'){
             sessionStorage.setItem('username', loginUsername)
             sessionStorage.setItem('name', res.data.name)
@@ -110,7 +111,7 @@ function Login(props){
             }, 5000)
             return
         }
-        const res = await axios.post('https://rooms-server-side.herokuapp.com/signup', { name: signupName, username: signupUsername, password: signupPassword} )
+        const res = await axios.post(`${REACT_APP_BACKEND_URL}/signup`, { name: signupName, username: signupUsername, password: signupPassword} )
         if(res.data.message === 'Success'){
             sessionStorage.setItem('username', signupUsername)
             sessionStorage.setItem('name', signupName)
@@ -139,7 +140,7 @@ function Login(props){
                 <a
                     style={{color: theme.text, cursor: 'pointer'}}
                     className="login-link"
-                    href={`https://github.com/login/oauth/authorize?scope=user&client_id=d38bd993581d49e7499c`}
+                    href={`https://github.com/login/oauth/authorize?scope=user&client_id=${REACT_APP_GITHUB_CLIENT_ID}`}
                 >
                     <GitHubIcon />
                     <span className="link-text"> Login Or SignUp with GitHub</span>

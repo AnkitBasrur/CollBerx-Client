@@ -26,7 +26,9 @@ const styles = {
   }
 };
 
-const socket = io("https://rooms-server-side.herokuapp.com/", connectionOptions);
+const { REACT_APP_BACKEND_URL, REACT_APP_GITHUB_CLIENT_ID,  } = process.env;
+const socket = io(`${REACT_APP_BACKEND_URL}/`, connectionOptions);
+
 function AddRoom(props) {
   const { isLightTheme, light, dark, toggleTheme } = useContext(ThemeContext);
   const theme = isLightTheme ? light : dark;

@@ -7,6 +7,7 @@ import {ThemeContext} from './contexts/ThemeContext'
 import { Button, TextField, Typography } from "@material-ui/core";
 import LoginNavBar from "./LoginNavBar";
 import GitHubIcon from '@material-ui/icons/GitHub';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = {
     light: {
@@ -34,6 +35,7 @@ function Login(props){
     const [signUpErrorMessage, setSignUpErrorMessage] = useState('');
     const [showLogin, setShowLogin] = useState(true);
     const [showSignup, setShowSignup] = useState(false)
+    const [showLoadingMessage, setShowLoadingMessage] = useState('');
 
     const ThemeTextTypography = withStyles({
         root: {
@@ -44,8 +46,10 @@ function Login(props){
     useEffect(async() => {
         const code = window.location.href.match(/\?code=(.*)/) && window.location.href.match(/\?code=(.*)/)[1];
 
-        if(code){
+        if(code && showLoadingMessage.length === 0){
+            setShowLoadingMessage("Verifying credentials...")
             const tokenResponse = await axios.get(`https://rooms-server-side.herokuapp.com/access-token/${code}`)
+            setShowLoadingMessage("Getting Data from GitHub...")
             const userResponse = await axios.get(`https://rooms-server-side.herokuapp.com/check-user/${tokenResponse.data.token}`)
             var name = userResponse.data.name;
             if(userResponse.data.name == null)
@@ -53,13 +57,21 @@ function Login(props){
             if(userResponse.data.isPresent){
                 sessionStorage.setItem('username', userResponse.data.username)
                 sessionStorage.setItem('name', name)
-                history.push('/home')
+                setShowLoadingMessage("CollBerx Account Exists")
+                setTimeout(() => {
+                    history.push('/home')
+                }, 2000)
+                
             }
             else{
+                setShowLoadingMessage("Creating A New User")
                 await axios.get(`https://rooms-server-side.herokuapp.com/get-repos/${userResponse.data.username}/${name}/${tokenResponse.data.token}`)
                 sessionStorage.setItem('username', userResponse.data.username)
                 sessionStorage.setItem('name', name)
-                history.push('/home')
+                setShowLoadingMessage("Successfully Created CollBerx Account")
+                setTimeout(() => {
+                    history.push('/home')
+                }, 2000)
             }
         }
     })
@@ -95,7 +107,6 @@ function Login(props){
 
             setTimeout(() => {
                 setSignUpErrorMessage("");
-
             }, 5000)
             return
         }
@@ -112,13 +123,21 @@ function Login(props){
             }, 5000)
         }
     }
-    
-    return (
-        <div style={{ paddingBottom: "10%", minHeight: "79.5vh", backgroundColor: theme.ui}}>
-        <LoginNavBar />
-            <Button style={{ marginLeft: "41%", marginTop: "5%", border: "1px solid grey"}}>
+    function loginView(){
+        if(showLoadingMessage.length > 0){
+            return(
+                <div style={{textAlign: 'center', marginTop: "12%"}}>
+                    <CircularProgress style={{color: theme.text}} size="15%" />
+                    <ThemeTextTypography variant="h4">{showLoadingMessage}</ThemeTextTypography>
+                </div>
+            )
+        }
+        else{
+            return(
+                <div>
+                <Button style={{ cursor: 'pointer', marginLeft: "41%", marginTop: "5%", border: "1px solid grey"}}>
                 <a
-                    style={{color: theme.text}}
+                    style={{color: theme.text, cursor: 'pointer'}}
                     className="login-link"
                     href={`https://github.com/login/oauth/authorize?scope=user&client_id=d38bd993581d49e7499c`}
                 >
@@ -150,6 +169,15 @@ function Login(props){
                         <ThemeTextTypography variant="h5" style={{color: "tomato"}}>{signUpErrorMessage}</ThemeTextTypography>
                     </form> : null }
             </div>
+            </div>
+            )
+        }
+        
+    }
+    return (
+        <div style={{ paddingBottom: "10%", minHeight: "79.5vh", backgroundColor: theme.ui}}>
+            <LoginNavBar />
+            {loginView()}
         </div>
     )
 }

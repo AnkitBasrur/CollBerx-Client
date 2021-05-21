@@ -1,10 +1,7 @@
 import React, { useContext } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
 import {ThemeContext} from './contexts/ThemeContext'
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import { useHistory } from 'react-router-dom';
@@ -45,7 +42,7 @@ function LoginNavBar(props){
             <ThemeTextTypography onClick={() => history.push('/')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "25%"}} >
               Home
             </ThemeTextTypography>
-            <ThemeTextTypography onClick={() => history.push('/tp')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
+            <ThemeTextTypography onClick={() => history.push('/')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
               About Us
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>

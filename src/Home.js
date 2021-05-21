@@ -103,7 +103,7 @@ function Home() {
     if(gitCount !== projects.length)
     return(
       <div>
-      <ThemeTextTypography style={{fontFamily: "Verdana", marginBottom: "1%", paddingTop: "2%"}} variant="h4"><b>Your Custom Rooms:</b></ThemeTextTypography>
+      <ThemeTextTypography style={{fontFamily: "Verdana", marginBottom: "1%", paddingTop: "2%"}} variant="h4"><b>Custom Rooms:</b></ThemeTextTypography>
           <Grid container style={{paddingLeft: "8%"}}>
                 {projects.length>0 ? projects.map((row,i)=>{
                   if(!row.isGitRepo)

@@ -29,7 +29,6 @@ var connectionOptions =  {
 };
 
 const { REACT_APP_BACKEND_URL } = process.env;
-console.log(process.env)
 const { uuid } = require('uuidv4');
 const styles = {
     light: {

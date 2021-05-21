@@ -31,7 +31,6 @@ function Logs(props) {
         }
     })(Typography);
 
-    console.log(props.location.state.logs)
     return(
         <div>
             <NavBar />

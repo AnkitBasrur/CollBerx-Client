@@ -8,6 +8,7 @@ import Login from "./Login";
 import ThemeContextProvider from "./contexts/ThemeContext";
 import AddRoom from "./AddRoom";
 import Logs from "./Logs";
+import Demo from "./Demo";
 
 function App() {
   function getProps(data){
@@ -26,6 +27,9 @@ function App() {
               <Route exact path="/main/:id" component={Main} />
               <Route exact path="/addRoom">
                 <AddRoom />
+              </Route>
+              <Route exact path="/demo">
+                <Demo />
               </Route>
               <Route exact path="/:id/logs" component={Logs} />
             </Switch>

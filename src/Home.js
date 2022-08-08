@@ -39,6 +39,7 @@ function Home() {
   if(!sessionStorage.getItem("username"))
         history.push('/')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(async () => {
     sessionStorage.setItem("roomID", "a")
     if(shouldFetch){

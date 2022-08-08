@@ -63,7 +63,7 @@ function NavBar(props){
               Add Room
             </ThemeTextTypography>
             <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
-              About Us
+              Watch DEMO
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>
             <Button aria-controls="simple-menu" aria-haspopup="true" style={{ marginLeft: "7%", fontFamily: "Arial" }} onClick={handleClick}>

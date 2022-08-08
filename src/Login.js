@@ -44,7 +44,8 @@ function Login(props){
         }
     })(Typography);
 
-    useEffect(async() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect( async() => {
         const code = window.location.href.match(/\?code=(.*)/) && window.location.href.match(/\?code=(.*)/)[1];
 
         if(code && showLoadingMessage.length === 0){

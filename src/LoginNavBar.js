@@ -42,8 +42,8 @@ function LoginNavBar(props){
             <ThemeTextTypography onClick={() => history.push('/')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "25%"}} >
               Home
             </ThemeTextTypography>
-            <ThemeTextTypography onClick={() => history.push('/')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
-              About Us
+            <ThemeTextTypography onClick={() => history.push('/demo')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
+              Watch DEMO
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>
           </Toolbar>

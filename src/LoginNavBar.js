@@ -37,7 +37,7 @@ function LoginNavBar(props){
               CollBerx
             </ThemeTextTypography>
             <ThemeTextTypography display="inline" onClick={() => history.push('/')} variant="h6" style={{ color: "grey", fontFamily: "Arial", cursor: "pointer", marginLeft:"5px"}}>
-                v1.4
+                v2.1
             </ThemeTextTypography>
             <ThemeTextTypography onClick={() => history.push('/')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "25%"}} >
               Home

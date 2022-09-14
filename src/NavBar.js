@@ -62,7 +62,7 @@ function NavBar(props){
             <ThemeTextTypography onClick={() => history.push('/addRoom')} variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", marginLeft: "5%"}} >
               Add Room
             </ThemeTextTypography>
-            <ThemeTextTypography variant="h6" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
+            <ThemeTextTypography onClick={() => history.push('/demo')} variant="h5" style={{ fontFamily: "Arial", cursor: "pointer", color: theme.text, marginLeft: "5%"}} >
               Watch DEMO
             </ThemeTextTypography>
             <Brightness4Icon style={{ cursor: "pointer", marginLeft: "5%"}} onClick={() => toggleTheme() }/>

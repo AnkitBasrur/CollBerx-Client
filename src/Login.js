@@ -49,8 +49,10 @@ function Login(props){
         const code = window.location.href.match(/\?code=(.*)/) && window.location.href.match(/\?code=(.*)/)[1];
 
         if(code && showLoadingMessage.length === 0){
+            console.log(code);
             setShowLoadingMessage("Verifying credentials...")
             const tokenResponse = await axios.get(`${REACT_APP_BACKEND_URL}/access-token/${code}`)
+            console.log(tokenResponse);
             setShowLoadingMessage("Getting Data from GitHub...")
             const userResponse = await axios.get(`${REACT_APP_BACKEND_URL}/check-user/${tokenResponse.data.token}`)
             var name = userResponse.data.name;
